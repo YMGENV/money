@@ -6,6 +6,7 @@
 <title>GoldTrack Finance — Your Vault, Your Terms</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
   :root{
     --ink:#15120c;
@@ -177,6 +178,26 @@
   .upload-box input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
   .upload-preview{ max-width:100%; max-height:120px; border-radius:6px; margin-top:8px; display:none; }
 
+  .ocr-detection{
+    margin-top:12px; padding:12px; border-radius:8px; font-size:0.85rem; display:none;
+  }
+  .ocr-detection.show{ display:block; }
+  .ocr-detection.success{ background:rgba(122, 145, 99, 0.2); border:1px solid var(--sage); color:var(--sage); }
+  .ocr-detection.warning{ background:rgba(177, 84, 61, 0.2); border:1px solid var(--rust); color:var(--rust); }
+  .ocr-detection.pending{ background:rgba(201, 162, 39, 0.2); border:1px solid var(--gold); color:var(--gold-bright); }
+  .ocr-amount{ font-weight:600; font-size:0.95rem; font-family:'IBM Plex Mono', monospace; }
+  .note-breakdown{ margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .note-row{ display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.18); border-radius:6px; padding:6px 10px; font-size:0.85rem; }
+  .note-row .note-label{ font-family:'IBM Plex Mono', monospace; }
+  .note-stepper{ display:flex; align-items:center; gap:9px; }
+  .note-stepper button{ width:22px; height:22px; border-radius:50%; border:1px solid var(--line); background:var(--panel-alt); color:var(--parchment); font-size:0.9rem; line-height:1; display:flex; align-items:center; justify-content:center; padding:0; }
+  .note-stepper button:hover{ border-color:var(--gold); }
+  .note-stepper .note-count{ min-width:1.4em; text-align:center; }
+  .note-total-row{ display:flex; justify-content:space-between; font-weight:600; padding-top:6px; margin-top:2px; border-top:1px dashed var(--line); }
+  .note-add-row{ display:flex; gap:8px; margin-top:6px; }
+  .note-add-row select{ flex:1; background:var(--ink); border:1px solid var(--line); color:var(--parchment); border-radius:6px; padding:6px 8px; font-size:0.8rem; }
+  .note-add-row button{ padding:6px 10px; font-size:0.78rem; }
+
   .ledger-list{ list-style:none; margin:0; padding:0; }
   .ledger-list li{
     display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);
@@ -195,11 +216,6 @@
   .empty-note{ color:var(--parchment-dim); font-size:0.88rem; padding:14px 0; }
 
   canvas#chart{ width:100%; height:220px; }
-
-  .msg-list, .inbox-list{ list-style:none; margin:0; padding:0; max-height:340px; overflow-y:auto; }
-  .msg-list li{ padding:10px 0; border-bottom:1px solid var(--line); }
-  .msg-from{ font-size:0.75rem; color:var(--gold-bright); }
-  .msg-time{ font-size:0.68rem; color:var(--parchment-dim); }
 
   .challenge-card{ border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; background:var(--panel-alt); }
   .challenge-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
@@ -328,7 +344,6 @@
     <div class="tabs-row">
       <button data-tab="ledger" class="active">Ledger</button>
       <button data-tab="chart">7-Day Chart</button>
-      <button data-tab="messages">Messages</button>
       <button data-tab="challenges">Challenges</button>
       <button data-tab="settings">Settings</button>
     </div>
@@ -371,6 +386,10 @@
             <input type="file" id="txn-file" accept="image/*">
             <img id="upload-preview" class="upload-preview">
           </div>
+          <div class="ocr-detection" id="ocr-detection">
+            <span id="ocr-status">Detecting amount...</span>
+            <div id="ocr-result" style="margin-top:6px;"></div>
+          </div>
         </div>
         <div class="error-msg" id="txn-error"></div>
         <button class="btn" id="btn-add-txn">Save to ledger</button>
@@ -388,29 +407,6 @@
       <div class="panel">
         <h2>Spending, last 7 days</h2>
         <canvas id="chart" width="900" height="220"></canvas>
-      </div>
-    </div>
-
-    <!-- Messages tab -->
-    <div class="tab-panel" id="tab-messages" style="display:none;">
-      <div class="panel">
-        <h2>Send a message</h2>
-        <div class="field">
-          <label for="msg-to">Recipient Vault ID</label>
-          <input id="msg-to" type="text" class="mono" placeholder="GT-XXXX-XXXX">
-        </div>
-        <div class="field">
-          <label for="msg-text">Message</label>
-          <textarea id="msg-text" rows="3" maxlength="240" placeholder="No balances or transaction details are shared here — just a note."></textarea>
-        </div>
-        <div class="error-msg" id="msg-error"></div>
-        <button class="btn" id="btn-send-msg">Send</button>
-        <p class="hint">Lookups only work for Vault IDs created in this browser.</p>
-      </div>
-      <div class="panel">
-        <h2>Inbox</h2>
-        <ul class="inbox-list" id="inbox-list"></ul>
-        <div class="empty-note" id="inbox-empty" style="display:none;">No messages yet.</div>
       </div>
     </div>
 
@@ -506,6 +502,20 @@
   const clearSession = () => localStorage.removeItem(SESSION_KEY);
 
   const CURRENCY_SYMBOL = { USD:'$', EUR:'€', GBP:'£', INR:'₹', JPY:'¥', CAD:'$', AUD:'$', NGN:'₦' };
+
+  // Real banknote denominations per currency, used to recognize actual notes
+  // in a photo instead of treating every digit Tesseract finds (serial
+  // numbers, print years, etc.) as part of the total.
+  const DENOMINATIONS = {
+    INR: [2000, 500, 200, 100, 50, 20, 10, 5],
+    USD: [100, 50, 20, 10, 5, 2, 1],
+    EUR: [500, 200, 100, 50, 20, 10, 5],
+    GBP: [50, 20, 10, 5],
+    JPY: [10000, 5000, 2000, 1000, 500, 100],
+    CAD: [100, 50, 20, 10, 5],
+    AUD: [100, 50, 20, 10, 5],
+    NGN: [1000, 500, 200, 100, 50, 20, 10, 5]
+  };
 
   function genSegment(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
   function genKID(){
@@ -663,11 +673,188 @@
     });
   });
 
-  /* ---------------- file upload ---------------- */
+  /* ---------------- file upload with OCR detection ---------------- */
   const uploadBox = document.getElementById('upload-box');
   const uploadInput = document.getElementById('txn-file');
   const uploadPreview = document.getElementById('upload-preview');
   const uploadLabel = document.getElementById('upload-label');
+  const ocrDetection = document.getElementById('ocr-detection');
+  const ocrStatus = document.getElementById('ocr-status');
+  const ocrResult = document.getElementById('ocr-result');
+  
+  let detectedAmounts = []; // Flattened list of note values counted toward the total
+  let noteCounts = {};      // { denomination: count } — the editable breakdown
+  let notesMode = false;    // true once we're validating against real note denominations
+
+  function currentCurrency(){
+    const kid = getSession();
+    const acc = kid ? getDirectory()[kid] : null;
+    return (acc && acc.currency) || 'INR';
+  }
+
+  // Count how many times each valid banknote value appears as a standalone
+  // number in the OCR text (not as part of a longer digit run, e.g. a
+  // serial number or a printed year), so a ₹100 note and a ₹200 note are
+  // recognized as ₹100 + ₹200 = ₹300 rather than every stray digit blob
+  // on the note being summed together.
+  function detectNotesFromText(text, currency){
+    const denoms = (DENOMINATIONS[currency] || []).slice().sort((a,b)=> b-a);
+    const counts = {};
+    denoms.forEach(d => {
+      let re;
+      try { re = new RegExp('(?<![\\d.])' + d + '(?!\\d)', 'g'); }
+      catch(e) { re = new RegExp('\\b' + d + '\\b', 'g'); } // fallback if lookbehind unsupported
+      const matches = text.match(re);
+      if (matches && matches.length) counts[d] = matches.length;
+    });
+    return counts;
+  }
+
+  function noteTotal(counts){
+    return Object.entries(counts).reduce((sum, [d,c]) => sum + (parseFloat(d) * c), 0);
+  }
+
+  function flattenCounts(counts){
+    const out = [];
+    Object.entries(counts).forEach(([d,c]) => { for (let i=0;i<c;i++) out.push(parseFloat(d)); });
+    return out;
+  }
+
+  function renderOcrUI(){
+    const currency = currentCurrency();
+    const sym = CURRENCY_SYMBOL[currency] || '';
+    const enteredAmount = parseFloat(document.getElementById('txn-amount').value);
+
+    if (notesMode){
+      const total = noteTotal(noteCounts);
+      detectedAmounts = flattenCounts(noteCounts);
+
+      const denoms = (DENOMINATIONS[currency] || []).slice().sort((a,b)=> b-a);
+      const missing = denoms.filter(d => !(d in noteCounts));
+      let rows = Object.entries(noteCounts)
+        .sort((a,b) => b[0]-a[0])
+        .map(([d,c]) => `
+          <div class="note-row" data-denom="${d}">
+            <span class="note-label">${sym}${d}</span>
+            <div class="note-stepper">
+              <button type="button" data-act="dec" data-denom="${d}">−</button>
+              <span class="note-count">${c}</span>
+              <button type="button" data-act="inc" data-denom="${d}">+</button>
+            </div>
+          </div>`).join('');
+
+      const addOptions = missing.map(d => `<option value="${d}">${sym}${d}</option>`).join('');
+      const addRow = missing.length
+        ? `<div class="note-add-row">
+             <select id="note-add-select">${addOptions}</select>
+             <button type="button" class="btn small secondary" id="note-add-btn">+ Add note</button>
+           </div>`
+        : '';
+
+      ocrStatus.textContent = '✓ Notes detected in image — adjust counts if anything was missed:';
+      ocrResult.innerHTML = `
+        <div class="note-breakdown">
+          ${rows || '<div class="hint" style="margin:0;">No notes detected yet.</div>'}
+          ${addRow}
+          <div class="note-total-row"><span>Total</span><span class="ocr-amount">${fmt(total, currency)}</span></div>
+        </div>`;
+
+      if (enteredAmount && Math.abs(total - enteredAmount) > 0.01){
+        ocrDetection.classList.remove('success');
+        ocrDetection.classList.add('warning');
+        ocrResult.innerHTML += `<div style="margin-top:6px; font-size:0.8rem;">⚠ You entered ${fmt(enteredAmount, currency)}, but the notes add up to ${fmt(total, currency)}.</div>`;
+      } else if (enteredAmount) {
+        ocrDetection.classList.remove('warning');
+        ocrDetection.classList.add('success');
+      }
+
+      ocrResult.querySelectorAll('[data-act]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const d = btn.dataset.denom;
+          if (btn.dataset.act === 'inc') noteCounts[d] = (noteCounts[d]||0) + 1;
+          else {
+            noteCounts[d] = (noteCounts[d]||0) - 1;
+            if (noteCounts[d] <= 0) delete noteCounts[d];
+          }
+          renderOcrUI();
+        });
+      });
+      const addBtn = document.getElementById('note-add-btn');
+      if (addBtn) addBtn.addEventListener('click', () => {
+        const d = document.getElementById('note-add-select').value;
+        noteCounts[d] = (noteCounts[d]||0) + 1;
+        renderOcrUI();
+      });
+    } else {
+      // Fallback: no recognizable notes found, fall back to raw amount matching
+      const total = detectedAmounts.reduce((a,b)=>a+b, 0);
+      if (detectedAmounts.length){
+        ocrResult.innerHTML = `<span class="ocr-amount">${detectedAmounts.join(' + ')} = ${fmt(total, currency)}</span>`;
+        if (enteredAmount && Math.abs(total - enteredAmount) > 0.01){
+          ocrDetection.classList.remove('success');
+          ocrDetection.classList.add('warning');
+          ocrResult.innerHTML += `<div style="margin-top:6px; font-size:0.8rem;">⚠ You entered ${fmt(enteredAmount, currency)}, image shows ${fmt(total, currency)}.</div>`;
+        } else if (enteredAmount) {
+          ocrDetection.classList.remove('warning');
+          ocrDetection.classList.add('success');
+          ocrResult.innerHTML += `<div style="margin-top:6px; font-size:0.8rem;">✓ Matches your entry</div>`;
+        }
+      } else {
+        ocrStatus.textContent = '⚠ Could not detect an amount. Please verify manually.';
+        ocrDetection.classList.remove('success');
+        ocrDetection.classList.add('warning');
+      }
+    }
+  }
+
+  async function extractAmountFromImage(dataUrl) {
+    try {
+      ocrDetection.classList.add('show', 'pending');
+      ocrStatus.textContent = '🔍 Scanning receipt...';
+      ocrResult.innerHTML = '';
+      
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise(r => img.onload = r);
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      
+      const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
+      const currency = currentCurrency();
+
+      // First, try to recognize real note denominations (e.g. ₹200 + ₹100).
+      const counts = detectNotesFromText(text, currency);
+
+      if (Object.keys(counts).length){
+        notesMode = true;
+        noteCounts = counts;
+        ocrDetection.classList.add('success');
+        renderOcrUI();
+      } else {
+        // Fallback: no known denominations matched, use raw numbers found
+        notesMode = false;
+        const numberPattern = /\d+\.?\d{0,2}/g;
+        const numbers = text.match(numberPattern) || [];
+        detectedAmounts = numbers.map(n => parseFloat(n)).filter(n => n > 0 && n < 1000000);
+        ocrStatus.textContent = detectedAmounts.length
+          ? '✓ Scanned. Could not match known note denominations — showing detected numbers:'
+          : '⚠ Could not detect amounts. Please verify manually.';
+        renderOcrUI();
+      }
+    } catch (err) {
+      console.error('OCR error:', err);
+      ocrStatus.textContent = '⚠ Could not scan receipt. Please verify amount manually.';
+      ocrDetection.classList.remove('success');
+      ocrDetection.classList.add('warning');
+      detectedAmounts = [];
+      noteCounts = {};
+      notesMode = false;
+    }
+  }
+  
   uploadInput.addEventListener('change', () => {
     const file = uploadInput.files[0];
     if (!file) return;
@@ -677,10 +864,16 @@
       uploadPreview.style.display = 'block';
       uploadLabel.textContent = file.name;
       uploadBox.classList.add('has-file');
+      extractAmountFromImage(dataUrl); // Run OCR
     });
   });
+  
+  // Re-check the match whenever the entered amount changes
+  document.getElementById('txn-amount').addEventListener('change', () => {
+    if (notesMode ? Object.keys(noteCounts).length : detectedAmounts.length) renderOcrUI();
+  });
 
-  /* ---------------- add transaction ---------------- */
+  /* ---------------- add transaction with validation ---------------- */
   document.getElementById('btn-add-txn').addEventListener('click', () => {
     const errEl = document.getElementById('txn-error');
     const amount = parseFloat(document.getElementById('txn-amount').value);
@@ -693,6 +886,16 @@
       uploadBox.classList.remove('shake'); void uploadBox.offsetWidth; uploadBox.classList.add('shake');
       return;
     }
+    
+    // Validate amount matches detected receipt amount
+    if (detectedAmounts.length > 0) {
+      const totalDetected = detectedAmounts.reduce((a,b) => a+b, 0);
+      if (Math.abs(totalDetected - amount) > 0.01) {
+        errEl.textContent = `⚠ Receipt shows ${totalDetected.toFixed(2)}, but you entered ${amount.toFixed(2)}. Please correct the amount.`;
+        return;
+      }
+    }
+    
     errEl.textContent = '';
 
     const kid = getSession();
@@ -712,10 +915,15 @@
     document.getElementById('txn-amount').value = '';
     document.getElementById('txn-desc').value = '';
     currentFileData = null;
+    detectedAmounts = [];
+    noteCounts = {};
+    notesMode = false;
     uploadPreview.style.display = 'none';
     uploadLabel.textContent = 'Tap to attach an image';
     uploadBox.classList.remove('has-file');
     uploadInput.value = '';
+    ocrDetection.classList.remove('show', 'success', 'warning', 'pending');
+    ocrResult.innerHTML = '';
 
     toast('Saved to your ledger.');
     renderAll();
@@ -824,40 +1032,6 @@
   }
   window.addEventListener('resize', () => { if (currentTab === 'chart') drawChart(); });
 
-  /* ---------------- messages ---------------- */
-  document.getElementById('btn-send-msg').addEventListener('click', () => {
-    const errEl = document.getElementById('msg-error');
-    const toKid = document.getElementById('msg-to').value.trim().toUpperCase();
-    const text = document.getElementById('msg-text').value.trim();
-    const myKid = getSession();
-    const dir = getDirectory();
-    if (!text){ errEl.textContent = 'Write a message before sending.'; return; }
-    if (!dir[toKid]){ errEl.textContent = 'No vault found with that ID.'; return; }
-    if (toKid === myKid){ errEl.textContent = 'Enter a different Vault ID — this one is yours.'; return; }
-    errEl.textContent = '';
-    dir[toKid].inbox.unshift({ from: myKid, fromName: dir[myKid].name, text, timestamp: Date.now() });
-    saveDirectory(dir);
-    document.getElementById('msg-text').value = '';
-    document.getElementById('msg-to').value = '';
-    toast('Message sent.');
-    renderInbox();
-  });
-
-  function renderInbox(){
-    const kid = getSession();
-    const acc = getDirectory()[kid];
-    const list = document.getElementById('inbox-list');
-    const empty = document.getElementById('inbox-empty');
-    list.innerHTML = '';
-    if (!acc.inbox || !acc.inbox.length){ empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-    acc.inbox.forEach(m => {
-      const li = document.createElement('li');
-      const d = new Date(m.timestamp);
-      li.innerHTML = `<div class="msg-from mono">${m.from} · ${escapeHtml(m.fromName)}</div><div>${escapeHtml(m.text)}</div><div class="msg-time">${d.toLocaleString()}</div>`;
-      list.appendChild(li);
-    });
-  }
   function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
   /* ---------------- challenges ---------------- */
@@ -1009,7 +1183,6 @@
   function renderAll(){
     renderBalance();
     renderLedger();
-    renderInbox();
     renderChallenges();
     loadSettings();
     if (currentTab === 'chart') drawChart();
