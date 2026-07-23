@@ -179,923 +179,809 @@
   .challenge-card{ border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; background:var(--panel-alt); }
   .challenge-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
   .challenge-code{ font-size:0.72rem; color:var(--parchment-dim); }
-  .progress-row{ display:flex; align-items:center; gap:10px; margin:8px 0; }
-  .progress-name{ width:110px; font-size:0.82rem; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .progress-track{ flex:1; height:10px; background:var(--ink); border-radius:6px; overflow:hidden; }
-  .progress-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-bright)); }
-  .progress-pct{ font-size:0.75rem; color:var(--parchment-dim); width:70px; text-align:right; flex-shrink:0; }
-
-  .stamp{
-    display:inline-block; border:2px solid var(--gold); color:var(--gold); font-size:0.6rem;
-    text-transform:uppercase; letter-spacing:0.1em; padding:2px 6px; border-radius:4px; transform:rotate(-4deg);
-  }
-
-  .modal-backdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
-  }
-  .modal-backdrop.open{ display:flex; }
-  .modal-backdrop img{ max-width:90vw; max-height:85vh; border-radius:10px; border:2px solid var(--gold); }
-  .modal-close{ position:absolute; top:20px; right:24px; background:none; border:none; color:var(--parchment); font-size:1.6rem; }
+  .progress-row{ display:flex; align-items:center; gap:12px; margin:10px 0; font-size:0.85rem; }
+  .progress-name{ flex:0 0 120px; color:var(--parchment); font-weight:500; }
+  .progress-track{ flex:1; height:6px; background:var(--panel); border-radius:3px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--gold); width:0%; }
+  .progress-pct{ flex:0 0 100px; text-align:right; color:var(--parchment-dim); font-size:0.75rem; }
+  .chal-empty{ color:var(--parchment-dim); padding:20px 0; }
 
   .toast{
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
-    background:var(--gold); color:var(--ink); padding:12px 20px; border-radius:8px; font-weight:600;
-    opacity:0; pointer-events:none; transition:all .25s ease; z-index:60; box-shadow:var(--shadow);
+    position:fixed; bottom:20px; right:20px; background:var(--panel); border:1px solid var(--line);
+    border-radius:8px; padding:14px 18px; max-width:300px; box-shadow:var(--shadow);
+    animation:slideIn .3s ease;
   }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  @keyframes slideIn{ from{ transform:translateY(100px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
 
-  footer.note{ text-align:center; color:var(--parchment-dim); font-size:0.78rem; margin-top:36px; }
-
-  /* ---------- Swipe pages ---------- */
-  .swipe-viewport{ overflow:hidden; position:relative; touch-action:pan-y; }
-  .swipe-track{ display:flex; width:300%; transition:transform .35s cubic-bezier(.2,.9,.25,1); }
-  @media (prefers-reduced-motion: reduce){ .swipe-track{ transition:none; } }
-  .swipe-page{ width:33.3334%; flex-shrink:0; min-width:0; }
-  .page-label{ text-align:center; font-size:0.72rem; color:var(--parchment-dim); text-transform:uppercase; letter-spacing:0.16em; margin-bottom:16px; }
-  .swipe-dots{ display:flex; justify-content:center; gap:8px; margin:18px 0 6px; }
-  .swipe-dots button{ width:8px; height:8px; border-radius:50%; border:none; background:var(--line); padding:0; }
-  .swipe-dots button.active{ background:var(--gold); width:22px; border-radius:5px; transition:width .2s ease, background .2s ease; }
-
-  .add-money-box{
-    display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:6px;
-    background:var(--panel-alt); border:1px solid var(--gold); border-radius:10px; padding:14px 18px;
-    cursor:pointer; transition:background .15s ease, transform .15s ease;
-  }
-  .add-money-box:hover{ background:rgba(201,162,39,0.14); }
-  .add-money-box:active{ transform:scale(0.98); }
-  .add-money-box .amb-label{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--parchment-dim); }
-  .add-money-box .amb-action{ display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-size:1.1rem; color:var(--gold-bright); }
-  .add-money-box .amb-plus{ width:26px; height:26px; border-radius:50%; background:var(--gold); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:700; flex-shrink:0; }
-
-  .panel-head-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
-  .panel-head-row h2{ margin:0; }
-
-  .filter-toggle{ display:flex; gap:8px; margin-bottom:18px; }
-  .filter-toggle button{ flex:1; padding:9px; border-radius:8px; border:1px solid var(--line); background:var(--ink); color:var(--parchment-dim); font-weight:600; font-size:0.85rem; }
-  .filter-toggle button.active{ background:var(--gold); color:var(--ink); border-color:var(--gold); }
-
-  .more-tabbar{ display:flex; gap:4px; margin-bottom:20px; background:var(--panel-alt); border-radius:999px; padding:4px; }
-  .more-tabbar button{ flex:1; padding:9px 12px; border:none; background:none; color:var(--parchment-dim); border-radius:999px; font-size:0.85rem; font-weight:600; }
-  .more-tabbar button.active{ background:var(--gold); color:var(--ink); }
-
-  .vault-id-row{ display:flex; align-items:center; justify-content:space-between; background:var(--panel-alt); border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:18px; }
-  .vault-id-row button{ background:none; border:none; color:var(--gold-bright); font-size:0.78rem; text-decoration:underline; }
-
-  .txn-modal .modal-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px;
-    width:100%; max-width:460px; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow); position:relative;
-  }
-  .txn-modal h2{ margin:0 0 18px; font-size:1.15rem; }
-  .txn-modal-close{ position:absolute; top:14px; right:16px; background:none; border:none; color:var(--parchment-dim); font-size:1.5rem; line-height:1; }
+  .nav-tabs{ display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:12px; }
+  .nav-tabs button{ background:none; border:none; color:var(--parchment-dim); padding:6px 12px; cursor:pointer; border-bottom:2px solid transparent; }
+  .nav-tabs button.active{ color:var(--gold); border-bottom-color:var(--gold); }
+  .loading{ display:inline-block; width:14px; height:14px; border:2px solid var(--line); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 </style>
 </head>
 <body>
-
 <div class="container">
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-mark"></div>
-      <div>
-        <div class="brand-name">GoldTrack Finance</div>
-        <div class="brand-tag">Privacy-first ledger</div>
+  <!-- Auth Screen -->
+  <div id="screen-auth">
+    <div class="vault-hero">
+      <div class="dial-wrap">
+        <div class="dial">
+          <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="dialGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#e8c766"/>
+                <stop offset="100%" stop-color="#c9a227"/>
+              </linearGradient>
+            </defs>
+            <circle cx="140" cy="140" r="135" fill="none" stroke="rgba(201,162,39,0.2)" stroke-width="1"/>
+            <circle cx="140" cy="140" r="125" fill="none" stroke="rgba(201,162,39,0.15)" stroke-width="1"/>
+            <g class="dial-needle">
+              <line x1="140" y1="140" x2="140" y2="30" stroke="url(#dialGrad)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="140" cy="140" r="6" fill="#c9a227"/>
+            </g>
+          </svg>
+          <div class="dial-kid">
+            <div class="label">Balance</div>
+            <div class="kid-value">₹0</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-copy">
+        <h1>GoldTrack</h1>
+        <p>Secure your finances with Supabase. Log in with your UPI ID from anywhere, create challenges with friends, and track every transaction in real-time.</p>
       </div>
     </div>
-    <div id="session-area"></div>
   </div>
 
-  <!-- ================= AUTH SCREEN ================= -->
-  <div id="screen-auth">
-    <div style="width:100%;">
-      <div class="vault-hero">
-        <div class="hero-copy">
-          <h1>Your money, your vault, your ID.</h1>
-          <p>GoldTrack runs entirely in this browser. No server sees your balance. Every account gets a randomized Vault ID (#KID) instead of a name — use it to log in, receive messages, and join savings challenges without ever sharing your real balance.</p>
-        </div>
-        <div class="dial-wrap">
-          <div class="dial">
-            <svg viewBox="0 0 280 280">
-              <circle cx="140" cy="140" r="132" fill="none" stroke="var(--line)" stroke-width="2"/>
-              <circle cx="140" cy="140" r="108" fill="none" stroke="var(--bronze)" stroke-width="1"/>
-              <g id="dial-ticks" stroke="var(--gold)" stroke-width="2"></g>
-              <line id="dial-needle" class="dial-needle" x1="140" y1="140" x2="140" y2="40" stroke="var(--gold-bright)" stroke-width="3" stroke-linecap="round"/>
-              <circle cx="140" cy="140" r="6" fill="var(--gold-bright)"/>
-            </svg>
-            <div class="dial-kid">
-              <div class="label">Vault ID</div>
-              <div class="kid-value mono" id="dial-kid-text">— — — —</div>
-            </div>
-          </div>
+  <!-- Login/Signup Card -->
+  <div id="auth-card" class="auth-card" style="max-width:400px; margin:0 auto;">
+    <div class="tabbar">
+      <button class="active" onclick="switchAuthTab('login')">Log In</button>
+      <button onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Tab -->
+    <div id="login-tab">
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••">
+      </div>
+      <div class="error-msg" id="login-error"></div>
+      <button class="btn" id="btn-login" onclick="handleLogin()">Log In</button>
+    </div>
+
+    <!-- Signup Tab -->
+    <div id="signup-tab" style="display:none;">
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="signup-email" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" placeholder="Your Name">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="signup-pass" placeholder="••••••••">
+      </div>
+      <div class="field">
+        <label>Currency</label>
+        <select id="signup-currency">
+          <option value="INR">₹ Indian Rupee</option>
+          <option value="USD">$ US Dollar</option>
+          <option value="EUR">€ Euro</option>
+        </select>
+      </div>
+      <div class="error-msg" id="signup-error"></div>
+      <button class="btn" id="btn-signup" onclick="handleSignup()">Sign Up</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Screen -->
+  <div id="screen-dashboard" style="display:none;">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-name">GoldTrack</div>
+          <div class="brand-tag">Cloud Sync Active</div>
         </div>
       </div>
+      <div class="session-pill">
+        <div class="dot"></div>
+        <span id="user-display">User</span>
+        <button onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
 
-      <div class="auth-card" style="max-width:460px; margin:0 auto;">
-        <div class="tabbar">
-          <button type="button" class="active" data-authtab="create">Create Vault</button>
-          <button type="button" data-authtab="login">Open Existing</button>
+    <div class="nav-tabs">
+      <button class="active" onclick="switchPage(0)">Dashboard</button>
+      <button onclick="switchPage(1)">Transactions</button>
+      <button onclick="switchPage(2)">Challenges</button>
+      <button onclick="switchPage(3)">Settings</button>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="page-0">
+      <div class="balance-strip">
+        <div>
+          <div class="label">Total Balance</div>
+          <div class="balance-value" id="total-balance">₹0.00</div>
         </div>
+      </div>
+      <div class="panel">
+        <h2>Recent Transactions</h2>
+        <ul class="ledger-list" id="recent-ledger">
+          <li class="empty-note">No transactions yet</li>
+        </ul>
+      </div>
+    </div>
 
-        <div id="auth-create">
+    <!-- Transactions Page -->
+    <div id="page-1" style="display:none;">
+      <div class="panel">
+        <h2>Add Transaction</h2>
+        <div class="grid-2">
           <div class="field">
-            <label for="create-name">Display name</label>
-            <input id="create-name" type="text" placeholder="e.g. R. Alvarez" maxlength="40">
-          </div>
-          <div class="field">
-            <label for="create-currency">Currency</label>
-            <select id="create-currency">
-              <option value="USD">USD — US Dollar ($)</option>
-              <option value="EUR">EUR — Euro (€)</option>
-              <option value="GBP">GBP — British Pound (£)</option>
-              <option value="INR">INR — Indian Rupee (₹)</option>
-              <option value="JPY">JPY — Japanese Yen (¥)</option>
-              <option value="CAD">CAD — Canadian Dollar ($)</option>
-              <option value="AUD">AUD — Australian Dollar ($)</option>
-              <option value="NGN">NGN — Nigerian Naira (₦)</option>
+            <label>Type</label>
+            <select id="trans-type">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
             </select>
           </div>
-          <div class="error-msg" id="create-error"></div>
-          <button class="btn" id="btn-create">Generate my Vault ID</button>
-          <p class="hint">Your ID is random — nothing about it is derived from your name or data.</p>
-        </div>
-
-        <div id="auth-login" style="display:none;">
           <div class="field">
-            <label for="login-kid">Vault ID</label>
-            <input id="login-kid" type="text" placeholder="GT-XXXX-XXXX" class="mono">
+            <label>Amount</label>
+            <input type="number" id="trans-amount" placeholder="0.00">
           </div>
-          <div class="error-msg" id="login-error"></div>
-          <button class="btn" id="btn-login">Open vault</button>
+          <div class="field">
+            <label>Category</label>
+            <input type="text" id="trans-category" placeholder="e.g., Salary, Groceries">
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <input type="text" id="trans-desc" placeholder="Optional notes">
+          </div>
         </div>
+        <div class="error-msg" id="trans-error"></div>
+        <button class="btn" onclick="addTransaction()">Add Transaction</button>
+      </div>
+
+      <div class="panel">
+        <h2>All Transactions</h2>
+        <ul class="ledger-list" id="all-ledger">
+          <li class="empty-note">No transactions yet</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Challenges Page -->
+    <div id="page-2" style="display:none;">
+      <div class="panel">
+        <h2>Create Challenge</h2>
+        <div class="grid-2">
+          <div class="field">
+            <label>Challenge Name</label>
+            <input type="text" id="chal-name" placeholder="e.g., Vacation Fund">
+          </div>
+          <div class="field">
+            <label>Target Amount</label>
+            <input type="number" id="chal-target" placeholder="0.00">
+          </div>
+        </div>
+        <div class="error-msg" id="chal-error"></div>
+        <button class="btn" onclick="createChallenge()">Create Challenge</button>
+      </div>
+
+      <div class="panel">
+        <h2>Join Challenge</h2>
+        <div class="field">
+          <label>Challenge Code</label>
+          <input type="text" id="chal-code" placeholder="e.g., ABC123" maxlength="6">
+        </div>
+        <div class="error-msg" id="join-error"></div>
+        <button class="btn secondary" onclick="joinChallenge()">Join Challenge</button>
+      </div>
+
+      <div class="panel">
+        <h2>Your Challenges</h2>
+        <div id="challenge-list">
+          <div class="chal-empty">No challenges yet. Create one or join using a code!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="page-3" style="display:none;">
+      <div class="panel">
+        <h2>Account Settings</h2>
+        <div class="field">
+          <label>Display Name</label>
+          <input type="text" id="settings-name">
+        </div>
+        <div class="field">
+          <label>Currency</label>
+          <select id="settings-currency">
+            <option value="INR">₹ Indian Rupee</option>
+            <option value="USD">$ US Dollar</option>
+            <option value="EUR">€ Euro</option>
+          </select>
+        </div>
+        <button class="btn" onclick="saveSettings()">Save Settings</button>
+      </div>
+
+      <div class="panel">
+        <h2>Danger Zone</h2>
+        <button class="btn danger" onclick="deleteAccount()">Delete Account</button>
       </div>
     </div>
   </div>
-
-  <!-- ================= DASHBOARD ================= -->
-  <div id="screen-dashboard">
-    <div class="balance-strip">
-      <div>
-        <div class="label">Current balance</div>
-        <div class="balance-value" id="balance-display">0.00</div>
-      </div>
-      <button type="button" class="add-money-box" id="add-money-box">
-        <div class="amb-label">Top up</div>
-        <div class="amb-action"><span class="amb-plus">+</span> Add Money</div>
-      </button>
-    </div>
-
-    <div class="swipe-viewport">
-      <div class="swipe-track" id="swipe-track">
-
-        <!-- Insights page (swipe right → this appears) -->
-        <div class="swipe-page" id="page-insights">
-          <div class="page-label">Spending insights</div>
-          <div class="panel">
-            <h2>Where it's going</h2>
-            <div class="filter-toggle">
-              <button type="button" data-range="daily" class="active">Daily</button>
-              <button type="button" data-range="monthly">Monthly</button>
-              <button type="button" data-range="yearly">Yearly</button>
-            </div>
-            <canvas id="chart" width="900" height="240"></canvas>
-            <div class="empty-note" id="chart-empty" style="display:none;">No expenses in this period yet.</div>
-          </div>
-        </div>
-
-        <!-- Home page (default) -->
-        <div class="swipe-page" id="page-home">
-          <div class="panel">
-            <div class="panel-head-row">
-              <h2>Transaction history</h2>
-              <button class="btn small secondary" id="btn-open-add-txn">+ Add Transaction</button>
-            </div>
-            <ul class="ledger-list" id="ledger-list"></ul>
-            <div class="empty-note" id="ledger-empty" style="display:none;">No transactions yet. Everything you record stays on this device.</div>
-          </div>
-        </div>
-
-        <!-- More page: challenges + settings (swipe left → this appears) -->
-        <div class="swipe-page" id="page-more">
-          <div class="page-label">Challenges &amp; settings</div>
-          <div class="more-tabbar">
-            <button type="button" class="active" data-moretab="challenges">Challenges</button>
-            <button type="button" data-moretab="settings">Settings</button>
-          </div>
-
-          <div id="more-challenges">
-            <div class="grid-2">
-              <div class="panel">
-                <h2>Start a challenge</h2>
-                <div class="field">
-                  <label for="chal-name">Challenge name</label>
-                  <input id="chal-name" type="text" maxlength="40" placeholder="e.g. Holiday Fund">
-                </div>
-                <div class="field">
-                  <label for="chal-target">Savings target</label>
-                  <input id="chal-target" type="number" min="1" step="0.01" placeholder="0.00">
-                </div>
-                <div class="error-msg" id="chal-error"></div>
-                <button class="btn" id="btn-create-chal">Create challenge</button>
-              </div>
-              <div class="panel">
-                <h2>Join a challenge</h2>
-                <div class="field">
-                  <label for="chal-code">Challenge code</label>
-                  <input id="chal-code" type="text" class="mono" placeholder="CHL-XXXX">
-                </div>
-                <div class="error-msg" id="join-error"></div>
-                <button class="btn secondary" id="btn-join-chal">Join</button>
-                <p class="hint">Everyone sees contributions toward the target — never anyone's full balance.</p>
-              </div>
-            </div>
-            <div class="panel">
-              <h2>Your challenges</h2>
-              <div id="challenge-list"></div>
-              <div class="empty-note" id="chal-empty" style="display:none;">You haven't joined any challenges yet.</div>
-            </div>
-          </div>
-
-          <div id="more-settings" style="display:none;">
-            <div class="panel">
-              <h2>Vault settings</h2>
-              <div class="vault-id-row">
-                <span class="mono" id="my-kid-text">GT-0000-0000</span>
-                <button id="copy-kid">copy</button>
-              </div>
-              <div class="field">
-                <label>Display name</label>
-                <input id="settings-name" type="text" maxlength="40">
-              </div>
-              <div class="field">
-                <label>Currency</label>
-                <select id="settings-currency">
-                  <option value="USD">USD — US Dollar ($)</option>
-                  <option value="EUR">EUR — Euro (€)</option>
-                  <option value="GBP">GBP — British Pound (£)</option>
-                  <option value="INR">INR — Indian Rupee (₹)</option>
-                  <option value="JPY">JPY — Japanese Yen (¥)</option>
-                  <option value="CAD">CAD — Canadian Dollar ($)</option>
-                  <option value="AUD">AUD — Australian Dollar ($)</option>
-                  <option value="NGN">NGN — Nigerian Naira (₦)</option>
-                </select>
-              </div>
-              <button class="btn secondary" id="btn-save-settings">Save changes</button>
-            </div>
-            <div class="panel">
-              <h2>Danger zone</h2>
-              <p class="hint" style="margin-top:0;">Deleting your vault removes your balance, ledger, and messages from this device permanently.</p>
-              <button class="btn danger" id="btn-delete-vault">Delete this vault</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="swipe-dots" id="swipe-dots">
-      <button type="button" data-page="0" aria-label="Insights"></button>
-      <button type="button" data-page="1" class="active" aria-label="Home"></button>
-      <button type="button" data-page="2" aria-label="More"></button>
-    </div>
-  </div>
-
-  <footer class="note">All data lives in this browser's local storage only. Clearing your browser data clears GoldTrack too.</footer>
 </div>
 
-<div class="modal-backdrop" id="modal-backdrop">
-  <button class="modal-close" id="modal-close">&times;</button>
-  <img id="modal-img" src="" alt="Receipt proof">
-</div>
-
-<div class="modal-backdrop txn-modal" id="txn-modal-backdrop">
-  <div class="modal-card">
-    <button class="txn-modal-close" id="txn-modal-close">&times;</button>
-    <h2 id="txn-modal-title">Add Transaction</h2>
-    <div class="field">
-      <label for="txn-amount">Amount</label>
-      <input id="txn-amount" type="number" min="0.01" step="0.01" placeholder="0.00">
-    </div>
-    <div class="field" id="txn-category-wrap" style="display:none;">
-      <label for="txn-category">Category</label>
-      <input id="txn-category" list="category-list" maxlength="30" placeholder="e.g. Games, Food, Transport">
-      <datalist id="category-list">
-        <option value="Food"></option>
-        <option value="Transport"></option>
-        <option value="Housing"></option>
-        <option value="Utilities"></option>
-        <option value="Entertainment"></option>
-        <option value="Games"></option>
-        <option value="Health"></option>
-        <option value="Shopping"></option>
-        <option value="Other"></option>
-      </datalist>
-    </div>
-    <div class="field">
-      <label for="txn-desc">Note (optional)</label>
-      <input id="txn-desc" type="text" maxlength="60" placeholder="What was this for?">
-    </div>
-    <div class="field">
-      <label>Receipt or photo proof — required</label>
-      <div class="upload-box" id="upload-box">
-        <span id="upload-label">Tap to attach an image</span>
-        <input type="file" id="txn-file" accept="image/*">
-        <img id="upload-preview" class="upload-preview">
-      </div>
-    </div>
-    <div class="error-msg" id="txn-error"></div>
-    <button class="btn" id="btn-add-txn">Save to ledger</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
-  "use strict";
+  // Supabase Configuration
+  const SUPABASE_URL = 'https://dioayutqevandnicgkja.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpb2F5dXRxZXZhbmRuaWNna2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjY2MTUsImV4cCI6MjEwMDMwMjYxNX0.emeR1SvKV7G08GOmwXHe3GasmD3nRutsdJR4xp9r31o';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  let currentUser = null;
+  let currentPage = 0;
+  let currencySymbol = { INR: '₹', USD: '$', EUR: '€' };
 
-  /* ---------------- storage helpers ---------------- */
-  const DIR_KEY = 'goldtrack_directory';
-  const SESSION_KEY = 'goldtrack_session';
-  const CHAL_KEY = 'goldtrack_challenges';
-
-  const getDirectory = () => JSON.parse(localStorage.getItem(DIR_KEY) || '{}');
-  const saveDirectory = (d) => localStorage.setItem(DIR_KEY, JSON.stringify(d));
-  const getChallenges = () => JSON.parse(localStorage.getItem(CHAL_KEY) || '{}');
-  const saveChallenges = (c) => localStorage.setItem(CHAL_KEY, JSON.stringify(c));
-  const getSession = () => localStorage.getItem(SESSION_KEY);
-  const setSession = (kid) => localStorage.setItem(SESSION_KEY, kid);
-  const clearSession = () => localStorage.removeItem(SESSION_KEY);
-
-  const CURRENCY_SYMBOL = { USD:'$', EUR:'€', GBP:'£', INR:'₹', JPY:'¥', CAD:'$', AUD:'$', NGN:'₦' };
-
-  function genSegment(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
-  function genKID(){
-    const dir = getDirectory();
-    let kid;
-    do { kid = `GT-${genSegment()}-${genSegment()}`; } while (dir[kid]);
-    return kid;
-  }
-  function genChallengeCode(){
-    const chals = getChallenges();
-    let code;
-    do { code = `CHL-${genSegment()}`; } while (chals[code]);
-    return code;
+  // Utility Functions
+  function toast(msg) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
   }
 
-  function toast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toast._t);
-    toast._t = setTimeout(()=> t.classList.remove('show'), 2200);
+  function fmt(amt, cur) {
+    const sym = currencySymbol[cur] || cur;
+    return sym + ' ' + amt.toFixed(2);
   }
 
-  /* ---------------- image handling ---------------- */
-  function resizeImage(file, maxDim, cb){
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > maxDim || height > maxDim){
-          if (width > height){ height = Math.round(height * maxDim / width); width = maxDim; }
-          else { width = Math.round(width * maxDim / height); height = maxDim; }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        cb(canvas.toDataURL('image/jpeg', 0.7));
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
   }
 
-  /* ---------------- state ---------------- */
-  let currentFileData = null;
-  let currentTxnType = 'income';
-  let currentPage = 1; // 0 = insights, 1 = home, 2 = more
-  let chartRange = 'daily';
-
-  /* ---------------- auth tab switching ---------------- */
-  document.querySelectorAll('[data-authtab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-authtab]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const which = btn.dataset.authtab;
-      document.getElementById('auth-create').style.display = which === 'create' ? 'block' : 'none';
-      document.getElementById('auth-login').style.display = which === 'login' ? 'block' : 'none';
-    });
-  });
-
-  /* ---------------- dial ticks ---------------- */
-  (function drawTicks(){
-    const g = document.getElementById('dial-ticks');
-    const cx=140, cy=140, r1=118, r2=130;
-    for(let i=0;i<40;i++){
-      const a = (i/40) * Math.PI * 2;
-      const x1 = cx + r1*Math.sin(a), y1 = cy - r1*Math.cos(a);
-      const x2 = cx + r2*Math.sin(a), y2 = cy - r2*Math.cos(a);
-      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',x1); line.setAttribute('y1',y1);
-      line.setAttribute('x2',x2); line.setAttribute('y2',y2);
-      line.setAttribute('opacity', i%5===0 ? '0.9' : '0.35');
-      g.appendChild(line);
+  // Auth Functions
+  function generateUPI(fullName) {
+    // Extract first and last name
+    const names = fullName.trim().split(/\s+/);
+    const firstName = names[0] || '';
+    const lastName = names[names.length - 1] || '';
+    
+    // Get first letters
+    const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+    
+    // Generate 5 random numbers
+    let randomNums = '';
+    for (let i = 0; i < 5; i++) {
+      randomNums += Math.floor(Math.random() * 10);
     }
-  })();
-
-  function spinDialTo(kid){
-    const needle = document.getElementById('dial-needle');
-    const deg = Math.floor(Math.random()*6)*360 + Math.floor(Math.random()*360);
-    needle.style.transform = `rotate(${deg}deg)`;
-    document.getElementById('dial-kid-text').textContent = kid;
+    
+    return initials + randomNums + '@goldtrack';
   }
 
-  /* ---------------- create / login ---------------- */
-  document.getElementById('btn-create').addEventListener('click', () => {
-    const name = document.getElementById('create-name').value.trim();
-    const currency = document.getElementById('create-currency').value;
-    const errEl = document.getElementById('create-error');
-    if (!name){ errEl.textContent = 'Enter a display name to continue.'; return; }
-    errEl.textContent = '';
-    const kid = genKID();
-    const dir = getDirectory();
-    dir[kid] = { kid, name, currency, balance:0, transactions:[], inbox:[], createdAt: Date.now() };
-    saveDirectory(dir);
-    spinDialTo(kid);
-    setTimeout(() => {
-      setSession(kid);
-      enterDashboard();
-      toast('Vault created — your ID is ' + kid);
-    }, 700);
-  });
-
-  document.getElementById('btn-login').addEventListener('click', () => {
-    const kid = document.getElementById('login-kid').value.trim().toUpperCase();
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-pass').value;
     const errEl = document.getElementById('login-error');
-    const dir = getDirectory();
-    if (!dir[kid]){ errEl.textContent = 'No vault found with that ID.'; return; }
     errEl.textContent = '';
-    setSession(kid);
-    enterDashboard();
-  });
 
-  /* ---------------- session UI ---------------- */
-  function renderSessionArea(){
-    const area = document.getElementById('session-area');
-    const kid = getSession();
-    if (!kid){ area.innerHTML = ''; return; }
-    const dir = getDirectory();
-    const acc = dir[kid];
-    area.innerHTML = `<div class="session-pill"><span class="dot"></span><span class="mono" style="font-size:0.82rem;">${acc ? acc.name : kid}</span><button id="btn-logout">log out</button></div>`;
-    document.getElementById('btn-logout').addEventListener('click', () => {
-      clearSession();
-      document.getElementById('screen-dashboard').style.display = 'none';
-      document.getElementById('screen-auth').style.display = 'flex';
-      renderSessionArea();
+    if (!email || !password) {
+      errEl.textContent = 'Please fill in all fields.';
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
     });
+
+    if (error) {
+      errEl.textContent = error.message;
+      return;
+    }
+
+    currentUser = data.user;
+    await loadUserData();
+    enterDashboard();
   }
 
-  function enterDashboard(){
+  async function handleSignup() {
+    const email = document.getElementById('signup-email').value.trim();
+    const name = document.getElementById('signup-name').value.trim();
+    const password = document.getElementById('signup-pass').value;
+    const currency = document.getElementById('signup-currency').value;
+    const errEl = document.getElementById('signup-error');
+    errEl.textContent = '';
+
+    if (!email || !name || !password) {
+      errEl.textContent = 'Please fill in all fields.';
+      return;
+    }
+
+    // Create auth user
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) {
+      errEl.textContent = error.message;
+      return;
+    }
+
+    // Generate UPI ID based on name
+    const upiId = generateUPI(name);
+
+    // Create user profile
+    const { error: insertError } = await supabase.from('users').insert({
+      id: data.user.id,
+      upi_id: upiId,
+      name,
+      currency,
+      balance: 0
+    });
+
+    if (insertError) {
+      errEl.textContent = insertError.message;
+      return;
+    }
+
+    currentUser = data.user;
+    await loadUserData();
+    toast('Account created! Your UPI ID: ' + upiId);
+    enterDashboard();
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    currentUser = null;
+    document.getElementById('screen-dashboard').style.display = 'none';
+    document.getElementById('screen-auth').style.display = 'flex';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-pass').value = '';
+    toast('Logged out.');
+  }
+
+  async function loadUserData() {
+    if (!currentUser) return;
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single();
+    
+    if (!error && data) {
+      window.userData = data;
+      document.getElementById('user-display').textContent = data.name;
+    }
+  }
+
+  function enterDashboard() {
     document.getElementById('screen-auth').style.display = 'none';
     document.getElementById('screen-dashboard').style.display = 'block';
-    renderSessionArea();
     renderAll();
   }
 
-  /* ---------------- swipeable pages ---------------- */
-  const swipeTrack = document.getElementById('swipe-track');
-  const swipeViewport = document.querySelector('.swipe-viewport');
-  const swipeDots = document.querySelectorAll('.swipe-dots button');
-
-  function goToPage(idx){
-    currentPage = Math.max(0, Math.min(2, idx));
-    swipeTrack.style.transform = `translateX(-${currentPage * (100/3)}%)`;
-    swipeDots.forEach((d,i) => d.classList.toggle('active', i === currentPage));
-    if (currentPage === 0) drawChart();
+  function switchAuthTab(tab) {
+    document.getElementById('login-tab').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('signup-tab').style.display = tab === 'signup' ? 'block' : 'none';
+    document.querySelectorAll('.tabbar button').forEach((btn, i) => {
+      btn.classList.toggle('active', (i === 0) === (tab === 'login'));
+    });
   }
-  swipeDots.forEach((d,i) => d.addEventListener('click', () => goToPage(i)));
-  goToPage(1);
 
-  let dragStartX = null, dragDeltaX = 0, dragging = false;
-  swipeViewport.addEventListener('pointerdown', (e) => {
-    dragging = true; dragStartX = e.clientX; dragDeltaX = 0;
-    swipeTrack.style.transition = 'none';
-  });
-  swipeViewport.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    dragDeltaX = e.clientX - dragStartX;
-    const base = -currentPage * (100/3);
-    const viewW = swipeViewport.clientWidth || 1;
-    const deltaPct = (dragDeltaX / viewW) * (100/3);
-    swipeTrack.style.transform = `translateX(${base + deltaPct}%)`;
-  });
-  function endDrag(){
-    if (!dragging) return;
-    dragging = false;
-    swipeTrack.style.transition = '';
-    const viewW = swipeViewport.clientWidth || 1;
-    if (Math.abs(dragDeltaX) > viewW * 0.16){
-      goToPage(currentPage + (dragDeltaX < 0 ? 1 : -1));
-    } else {
-      goToPage(currentPage);
+  function switchPage(page) {
+    currentPage = page;
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('page-' + i).style.display = i === page ? 'block' : 'none';
     }
-  }
-  swipeViewport.addEventListener('pointerup', endDrag);
-  swipeViewport.addEventListener('pointercancel', endDrag);
-  swipeViewport.addEventListener('pointerleave', () => { if (dragging) endDrag(); });
-
-  /* ---------------- more page: challenges / settings toggle ---------------- */
-  document.querySelectorAll('.more-tabbar button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.more-tabbar button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const which = btn.dataset.moretab;
-      document.getElementById('more-challenges').style.display = which === 'challenges' ? 'block' : 'none';
-      document.getElementById('more-settings').style.display = which === 'settings' ? 'block' : 'none';
+    document.querySelectorAll('.nav-tabs button').forEach((btn, i) => {
+      btn.classList.toggle('active', i === page);
     });
-  });
-
-  /* ---------------- spending insights filter ---------------- */
-  document.querySelectorAll('.filter-toggle button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-toggle button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      chartRange = btn.dataset.range;
-      drawChart();
-    });
-  });
-
-  /* ---------------- file upload (photo required, no verification) ---------------- */
-  const uploadBox = document.getElementById('upload-box');
-  const uploadInput = document.getElementById('txn-file');
-  const uploadPreview = document.getElementById('upload-preview');
-  const uploadLabel = document.getElementById('upload-label');
-
-  uploadInput.addEventListener('change', () => {
-    const file = uploadInput.files[0];
-    if (!file) return;
-    resizeImage(file, 480, (dataUrl) => {
-      currentFileData = dataUrl;
-      uploadPreview.src = dataUrl;
-      uploadPreview.style.display = 'block';
-      uploadLabel.textContent = file.name;
-      uploadBox.classList.add('has-file');
-    });
-  });
-
-  /* ---------------- add transaction modal ---------------- */
-  const txnModalBackdrop = document.getElementById('txn-modal-backdrop');
-
-  function openTxnModal(type){
-    currentTxnType = type;
-    document.getElementById('txn-modal-title').textContent = type === 'income' ? 'Add Money' : 'Add Transaction';
-    document.getElementById('txn-category-wrap').style.display = type === 'expense' ? 'block' : 'none';
-    document.getElementById('txn-amount').value = '';
-    document.getElementById('txn-desc').value = '';
-    document.getElementById('txn-category').value = '';
-    document.getElementById('txn-error').textContent = '';
-    currentFileData = null;
-    uploadPreview.style.display = 'none';
-    uploadLabel.textContent = 'Tap to attach an image';
-    uploadBox.classList.remove('has-file');
-    uploadInput.value = '';
-    txnModalBackdrop.classList.add('open');
+    renderAll();
   }
-  function closeTxnModal(){
-    txnModalBackdrop.classList.remove('open');
-  }
-  document.getElementById('add-money-box').addEventListener('click', () => openTxnModal('income'));
-  document.getElementById('btn-open-add-txn').addEventListener('click', () => openTxnModal('expense'));
-  document.getElementById('txn-modal-close').addEventListener('click', closeTxnModal);
-  txnModalBackdrop.addEventListener('click', (e) => { if (e.target.id === 'txn-modal-backdrop') closeTxnModal(); });
 
-  /* ---------------- add transaction with validation ---------------- */
-  document.getElementById('btn-add-txn').addEventListener('click', () => {
-    const errEl = document.getElementById('txn-error');
-    const amount = parseFloat(document.getElementById('txn-amount').value);
-    const desc = document.getElementById('txn-desc').value.trim();
-    const category = currentTxnType === 'expense' ? (document.getElementById('txn-category').value.trim() || 'Other') : null;
+  // Transaction Functions
+  async function addTransaction() {
+    if (!currentUser) return;
+    const type = document.getElementById('trans-type').value;
+    const amount = parseFloat(document.getElementById('trans-amount').value);
+    const category = document.getElementById('trans-category').value.trim();
+    const desc = document.getElementById('trans-desc').value.trim();
+    const errEl = document.getElementById('trans-error');
+    errEl.textContent = '';
 
-    if (!amount || amount <= 0){ errEl.textContent = 'Enter an amount greater than zero.'; return; }
-    if (!currentFileData){
-      errEl.textContent = 'Attach a receipt or photo before saving this transaction.';
-      uploadBox.classList.remove('shake'); void uploadBox.offsetWidth; uploadBox.classList.add('shake');
+    if (!amount || amount <= 0) {
+      errEl.textContent = 'Enter a valid amount.';
       return;
     }
 
-    errEl.textContent = '';
+    const transId = 'T' + Date.now();
+    const sign = type === 'income' ? 1 : -1;
 
-    const kid = getSession();
-    const dir = getDirectory();
-    const acc = dir[kid];
-    const txn = {
-      id: 'T' + Date.now() + Math.floor(Math.random()*1000),
-      type: currentTxnType,
-      amount, category, desc,
-      proof: currentFileData,
+    const { error: insertError } = await supabase.from('transactions').insert({
+      id: transId,
+      user_id: currentUser.id,
+      type,
+      amount,
+      category: category || 'Other',
+      description: desc,
       date: new Date().toISOString()
-    };
-    acc.transactions.unshift(txn);
-    acc.balance += currentTxnType === 'income' ? amount : -amount;
-    saveDirectory(dir);
+    });
 
-    document.getElementById('txn-amount').value = '';
-    document.getElementById('txn-desc').value = '';
-    currentFileData = null;
-    uploadPreview.style.display = 'none';
-    uploadLabel.textContent = 'Tap to attach an image';
-    uploadBox.classList.remove('has-file');
-    uploadInput.value = '';
+    if (insertError) {
+      errEl.textContent = insertError.message;
+      return;
+    }
 
-    closeTxnModal();
-    toast('Saved to your ledger.');
+    // Update balance
+    const { data } = await supabase.from('users').select('balance').eq('id', currentUser.id).single();
+    const newBalance = (data?.balance || 0) + (sign * amount);
+    await supabase.from('users').update({ balance: newBalance }).eq('id', currentUser.id);
+
+    await loadUserData();
+    document.getElementById('trans-amount').value = '';
+    document.getElementById('trans-category').value = '';
+    document.getElementById('trans-desc').value = '';
+    toast('Transaction added!');
     renderAll();
-  });
-
-  /* ---------------- render ledger + balance ---------------- */
-  function fmt(amount, currency){
-    const sym = CURRENCY_SYMBOL[currency] || '';
-    return sym + Math.abs(amount).toFixed(2);
   }
 
-  function renderBalance(){
-    const kid = getSession();
-    const acc = getDirectory()[kid];
-    if (!acc) return;
-    const isNegative = acc.balance < 0;
-    const display = document.getElementById('balance-display');
-    display.textContent = (isNegative ? '-' : '') + fmt(acc.balance, acc.currency);
-    display.classList.toggle('negative', isNegative);
-    document.getElementById('my-kid-text').textContent = acc.kid;
-  }
+  async function renderTransactions() {
+    if (!currentUser || !window.userData) return;
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('date', { ascending: false });
 
-  function renderLedger(){
-    const kid = getSession();
-    const acc = getDirectory()[kid];
-    const list = document.getElementById('ledger-list');
-    const empty = document.getElementById('ledger-empty');
+    const list = document.getElementById('all-ledger');
     list.innerHTML = '';
-    if (!acc.transactions.length){ empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-    acc.transactions.forEach(t => {
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<li class="empty-note">No transactions yet</li>';
+      return;
+    }
+
+    data.forEach(t => {
+      const isIncome = t.type === 'income';
       const li = document.createElement('li');
-      const d = new Date(t.date);
-      const thumb = t.proof ? `<img class="ledger-thumb" src="${t.proof}" alt="proof" data-full="${t.proof}">` : `<div class="ledger-thumb" style="display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:var(--parchment-dim);">n/a</div>`;
       li.innerHTML = `
-        ${thumb}
         <div class="ledger-info">
-          <div class="desc">${t.desc || (t.category || (t.type === 'income' ? 'Income' : 'Expense'))}</div>
-          <div class="cat">${t.category ? t.category + ' · ' : ''}${t.proof ? '<span class="stamp">Proof attached</span>' : ''}</div>
+          <div class="cat">${escapeHtml(t.category)}</div>
+          <div class="desc">${escapeHtml(t.description || 'No description')}</div>
         </div>
-        <div style="text-align:right;">
-          <div class="ledger-amt ${t.type}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount, acc.currency)}</div>
-          <div class="ledger-date">${d.toLocaleDateString()}</div>
-        </div>`;
+        <div class="ledger-amt ${isIncome ? 'income' : 'expense'}">
+          ${isIncome ? '+' : '-'} ${fmt(t.amount, window.userData.currency)}
+        </div>
+        <div class="ledger-date">${new Date(t.date).toLocaleDateString()}</div>
+      `;
       list.appendChild(li);
     });
-    list.querySelectorAll('.ledger-thumb[data-full]').forEach(img => {
-      img.addEventListener('click', () => openModal(img.dataset.full));
-    });
   }
 
-  function openModal(src){
-    document.getElementById('modal-img').src = src;
-    document.getElementById('modal-backdrop').classList.add('open');
-  }
-  document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-backdrop').classList.remove('open'));
-  document.getElementById('modal-backdrop').addEventListener('click', (e) => {
-    if (e.target.id === 'modal-backdrop') e.currentTarget.classList.remove('open');
-  });
+  async function renderBalance() {
+    if (!currentUser || !window.userData) return;
+    const { data } = await supabase.from('users').select('balance').eq('id', currentUser.id).single();
+    if (data) {
+      document.getElementById('total-balance').textContent = fmt(data.balance || 0, window.userData.currency);
+      document.getElementById('recent-ledger').innerHTML = '';
 
-  /* ---------------- category spending chart ---------------- */
-  function rangeStartFor(range){
-    const now = new Date();
-    if (range === 'monthly') return new Date(now.getFullYear(), now.getMonth(), 1);
-    if (range === 'yearly') return new Date(now.getFullYear(), 0, 1);
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate()); // daily
-  }
+      const { data: trans } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('date', { ascending: false })
+        .limit(5);
 
-  function drawChart(){
-    const kid = getSession();
-    const acc = kid ? getDirectory()[kid] : null;
-    const canvas = document.getElementById('chart');
-    const emptyEl = document.getElementById('chart-empty');
-    if (!acc || !canvas) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const cssW = canvas.clientWidth || 900, cssH = 240;
-    canvas.width = cssW * dpr; canvas.height = cssH * dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.clearRect(0,0,cssW,cssH);
-
-    const start = rangeStartFor(chartRange);
-    const totalsByCat = {};
-    acc.transactions.forEach(t => {
-      if (t.type !== 'expense') return;
-      if (new Date(t.date) < start) return;
-      const cat = (t.category || 'Other').trim() || 'Other';
-      totalsByCat[cat] = (totalsByCat[cat] || 0) + t.amount;
-    });
-
-    const entries = Object.entries(totalsByCat).sort((a,b) => b[1]-a[1]);
-    if (!entries.length){
-      if (emptyEl) emptyEl.style.display = 'block';
-      canvas.style.display = 'none';
-      return;
+      if (trans && trans.length > 0) {
+        trans.forEach(t => {
+          const isIncome = t.type === 'income';
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div class="ledger-info">
+              <div class="cat">${escapeHtml(t.category)}</div>
+              <div class="desc">${escapeHtml(t.description || 'No desc')}</div>
+            </div>
+            <div class="ledger-amt ${isIncome ? 'income' : 'expense'}">
+              ${isIncome ? '+' : '-'} ${fmt(t.amount, window.userData.currency)}
+            </div>
+          `;
+          document.getElementById('recent-ledger').appendChild(li);
+        });
+      } else {
+        document.getElementById('recent-ledger').innerHTML = '<li class="empty-note">No transactions yet</li>';
+      }
     }
-    if (emptyEl) emptyEl.style.display = 'none';
-    canvas.style.display = 'block';
-
-    const max = Math.max(...entries.map(e => e[1]), 1);
-    const barW = Math.min(64, (cssW / entries.length) * 0.5);
-    const gap = cssW / entries.length;
-
-    entries.forEach(([cat, total], i) => {
-      const h = (total/max) * (cssH - 56);
-      const x = gap*i + (gap-barW)/2;
-      const y = cssH - 34 - h;
-      const grad = ctx.createLinearGradient(0,y,0,cssH-34);
-      grad.addColorStop(0, '#e8c766');
-      grad.addColorStop(1, '#8a6d3b');
-      ctx.fillStyle = grad;
-      ctx.fillRect(x, y, barW, Math.max(h,2));
-
-      ctx.fillStyle = '#c9bfa9';
-      ctx.font = '11px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      const label = cat.length > 10 ? cat.slice(0,9) + '…' : cat;
-      ctx.fillText(label, x+barW/2, cssH-14);
-
-      ctx.fillStyle = '#efe6d3';
-      ctx.font = '11px IBM Plex Mono, monospace';
-      ctx.fillText(fmt(total, acc.currency), x+barW/2, y-6);
-    });
   }
-  window.addEventListener('resize', () => { if (currentPage === 0) drawChart(); });
 
-  function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  // Challenge Functions
+  function genChallengeCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
 
-  /* ---------------- challenges ---------------- */
-  document.getElementById('btn-create-chal').addEventListener('click', () => {
-    const errEl = document.getElementById('chal-error');
+  async function createChallenge() {
+    if (!currentUser || !window.userData) return;
     const name = document.getElementById('chal-name').value.trim();
     const target = parseFloat(document.getElementById('chal-target').value);
-    if (!name){ errEl.textContent = 'Name your challenge.'; return; }
-    if (!target || target <= 0){ errEl.textContent = 'Enter a target greater than zero.'; return; }
+    const errEl = document.getElementById('chal-error');
     errEl.textContent = '';
-    const kid = getSession();
-    const dir = getDirectory();
+
+    if (!name) {
+      errEl.textContent = 'Name your challenge.';
+      return;
+    }
+    if (!target || target <= 0) {
+      errEl.textContent = 'Enter a target greater than zero.';
+      return;
+    }
+
     const code = genChallengeCode();
-    const chals = getChallenges();
-    chals[code] = {
-      code, name, target, createdBy: kid,
-      participants: [{ kid, name: dir[kid].name, contributed: 0 }],
-      createdAt: Date.now()
-    };
-    saveChallenges(chals);
+    const { error: chalError } = await supabase.from('challenges').insert({
+      code,
+      creator_id: currentUser.id,
+      name,
+      target
+    });
+
+    if (chalError) {
+      errEl.textContent = chalError.message;
+      return;
+    }
+
+    const { error: partError } = await supabase.from('challenge_participants').insert({
+      challenge_code: code,
+      user_id: currentUser.id,
+      contributed: 0
+    });
+
+    if (partError) {
+      errEl.textContent = partError.message;
+      return;
+    }
+
     document.getElementById('chal-name').value = '';
     document.getElementById('chal-target').value = '';
     toast('Challenge created — code ' + code);
     renderChallenges();
-  });
+  }
 
-  document.getElementById('btn-join-chal').addEventListener('click', () => {
-    const errEl = document.getElementById('join-error');
+  async function joinChallenge() {
+    if (!currentUser) return;
     const code = document.getElementById('chal-code').value.trim().toUpperCase();
-    const kid = getSession();
-    const dir = getDirectory();
-    const chals = getChallenges();
-    if (!chals[code]){ errEl.textContent = 'No challenge found with that code.'; return; }
-    const already = chals[code].participants.some(p => p.kid === kid);
-    if (already){ errEl.textContent = 'You already joined this challenge.'; return; }
+    const errEl = document.getElementById('join-error');
     errEl.textContent = '';
-    chals[code].participants.push({ kid, name: dir[kid].name, contributed: 0 });
-    saveChallenges(chals);
-    document.getElementById('chal-code').value = '';
-    toast('Joined ' + chals[code].name + '.');
-    renderChallenges();
-  });
 
-  function contributeToChallenge(code){
-    const kid = getSession();
-    const dir = getDirectory();
-    const acc = dir[kid];
-    const chals = getChallenges();
-    const chal = chals[code];
-    const raw = prompt('How much would you like to contribute to "' + chal.name + '"?');
-    if (raw === null) return;
-    const amount = parseFloat(raw);
-    if (!amount || amount <= 0){ toast('Enter an amount greater than zero.'); return; }
-    if (amount > acc.balance){ toast('Not enough gold in your vault for that.'); return; }
+    const { data: chal, error: chalError } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('code', code)
+      .single();
 
-    acc.balance -= amount;
-    acc.transactions.unshift({
-      id: 'T' + Date.now(), type: 'expense', amount,
-      category: 'Savings Challenge', desc: 'Contribution to ' + chal.name,
-      proof: null, date: new Date().toISOString(), internal: true
+    if (chalError || !chal) {
+      errEl.textContent = 'No challenge found with that code.';
+      return;
+    }
+
+    const { data: existing } = await supabase
+      .from('challenge_participants')
+      .select('*')
+      .eq('challenge_code', code)
+      .eq('user_id', currentUser.id)
+      .single();
+
+    if (existing) {
+      errEl.textContent = 'You already joined this challenge.';
+      return;
+    }
+
+    const { error } = await supabase.from('challenge_participants').insert({
+      challenge_code: code,
+      user_id: currentUser.id,
+      contributed: 0
     });
-    const participant = chal.participants.find(p => p.kid === kid);
-    participant.contributed += amount;
 
-    saveDirectory(dir);
-    saveChallenges(chals);
-    toast('Contributed ' + fmt(amount, acc.currency) + ' to ' + chal.name + '.');
+    if (error) {
+      errEl.textContent = error.message;
+      return;
+    }
+
+    document.getElementById('chal-code').value = '';
+    toast('Joined ' + chal.name);
+    renderChallenges();
+  }
+
+  async function contributeToChallenge(code) {
+    if (!currentUser || !window.userData) return;
+    const raw = prompt('How much would you like to contribute?');
+    if (raw === null) return;
+
+    const amount = parseFloat(raw);
+    if (!amount || amount <= 0) {
+      toast('Enter an amount greater than zero.');
+      return;
+    }
+
+    if (amount > window.userData.balance) {
+      toast('Not enough balance.');
+      return;
+    }
+
+    // Add transaction
+    const { error: transError } = await supabase.from('transactions').insert({
+      id: 'T' + Date.now(),
+      user_id: currentUser.id,
+      type: 'expense',
+      amount,
+      category: 'Challenge Contribution',
+      description: 'Challenge contribution',
+      date: new Date().toISOString()
+    });
+
+    if (transError) {
+      toast('Error adding transaction.');
+      return;
+    }
+
+    // Update balance
+    const newBalance = window.userData.balance - amount;
+    await supabase.from('users').update({ balance: newBalance }).eq('id', currentUser.id);
+
+    // Update contribution
+    const { data: part } = await supabase
+      .from('challenge_participants')
+      .select('*')
+      .eq('challenge_code', code)
+      .eq('user_id', currentUser.id)
+      .single();
+
+    if (part) {
+      await supabase
+        .from('challenge_participants')
+        .update({ contributed: part.contributed + amount })
+        .eq('id', part.id);
+    }
+
+    await loadUserData();
+    toast('Contributed ' + fmt(amount, window.userData.currency));
     renderAll();
   }
 
-  function renderChallenges(){
-    const kid = getSession();
-    const chals = getChallenges();
-    const mine = Object.values(chals).filter(c => c.participants.some(p => p.kid === kid));
-    const container = document.getElementById('challenge-list');
-    const empty = document.getElementById('chal-empty');
-    container.innerHTML = '';
-    if (!mine.length){ empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
+  async function renderChallenges() {
+    if (!currentUser || !window.userData) return;
+    const { data: participants } = await supabase
+      .from('challenge_participants')
+      .select('challenge_code')
+      .eq('user_id', currentUser.id);
 
-    mine.forEach(c => {
+    const codes = participants?.map(p => p.challenge_code) || [];
+    if (codes.length === 0) {
+      document.getElementById('challenge-list').innerHTML = '<div class="chal-empty">No challenges yet</div>';
+      return;
+    }
+
+    const { data: chals } = await supabase
+      .from('challenges')
+      .select('*')
+      .in('code', codes);
+
+    const container = document.getElementById('challenge-list');
+    container.innerHTML = '';
+
+    for (const chal of chals || []) {
+      const { data: parts } = await supabase
+        .from('challenge_participants')
+        .select('*')
+        .eq('challenge_code', chal.code);
+
       const card = document.createElement('div');
       card.className = 'challenge-card';
-      const dir = getDirectory();
-      const currency = dir[kid].currency;
       let rows = '';
-      c.participants.slice().sort((a,b)=> b.contributed - a.contributed).forEach(p => {
-        const pct = Math.min(100, Math.round((p.contributed / c.target) * 100));
-        rows += `<div class="progress-row">
-          <div class="progress-name">${p.kid === kid ? escapeHtml(p.name) + ' (you)' : escapeHtml(p.name)}</div>
-          <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
-          <div class="progress-pct">${fmt(p.contributed, currency)} · ${pct}%</div>
-        </div>`;
-      });
+
+      const sorted = (parts || []).sort((a, b) => b.contributed - a.contributed);
+      for (const p of sorted) {
+        const { data: user } = await supabase.from('users').select('name').eq('id', p.user_id).single();
+        const pct = Math.min(100, Math.round((p.contributed / chal.target) * 100));
+        rows += `
+          <div class="progress-row">
+            <div class="progress-name">${escapeHtml(user?.name || 'Unknown')} ${p.user_id === currentUser.id ? '(you)' : ''}</div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+            <div class="progress-pct">${fmt(p.contributed, window.userData.currency)} · ${pct}%</div>
+          </div>
+        `;
+      }
+
       card.innerHTML = `
         <div class="challenge-head">
-          <h3 style="margin:0; font-size:1rem;">${escapeHtml(c.name)}</h3>
-          <span class="challenge-code mono">${c.code}</span>
+          <h3 style="margin:0; font-size:1rem;">${escapeHtml(chal.name)}</h3>
+          <span class="challenge-code mono">${chal.code}</span>
         </div>
-        <div class="hint" style="margin-top:0;">Target: ${fmt(c.target, currency)}</div>
+        <div class="hint" style="margin-top:0;">Target: ${fmt(chal.target, window.userData.currency)}</div>
         ${rows}
-        <button class="btn small secondary" data-contribute="${c.code}" style="margin-top:8px;">Contribute</button>
+        <button class="btn small secondary" style="margin-top:8px;" onclick="contributeToChallenge('${chal.code}')">Contribute</button>
       `;
       container.appendChild(card);
-    });
-    container.querySelectorAll('[data-contribute]').forEach(btn => {
-      btn.addEventListener('click', () => contributeToChallenge(btn.dataset.contribute));
-    });
+    }
   }
 
-  /* ---------------- settings ---------------- */
-  function loadSettings(){
-    const kid = getSession();
-    const acc = getDirectory()[kid];
-    document.getElementById('settings-name').value = acc.name;
-    document.getElementById('settings-currency').value = acc.currency;
+  // Settings Functions
+  function loadSettings() {
+    if (!window.userData) return;
+    document.getElementById('settings-name').value = window.userData.name;
+    document.getElementById('settings-currency').value = window.userData.currency;
   }
-  document.getElementById('btn-save-settings').addEventListener('click', () => {
-    const kid = getSession();
-    const dir = getDirectory();
+
+  async function saveSettings() {
+    if (!currentUser) return;
     const name = document.getElementById('settings-name').value.trim();
-    if (!name){ toast('Display name cannot be empty.'); return; }
-    dir[kid].name = name;
-    dir[kid].currency = document.getElementById('settings-currency').value;
-    saveDirectory(dir);
+    if (!name) {
+      toast('Name cannot be empty.');
+      return;
+    }
+
+    await supabase.from('users').update({
+      name,
+      currency: document.getElementById('settings-currency').value
+    }).eq('id', currentUser.id);
+
+    await loadUserData();
     toast('Settings saved.');
     renderAll();
-  });
-  document.getElementById('btn-delete-vault').addEventListener('click', () => {
-    if (!confirm('Delete this vault permanently? This cannot be undone.')) return;
-    const kid = getSession();
-    const dir = getDirectory();
-    delete dir[kid];
-    saveDirectory(dir);
-    clearSession();
-    document.getElementById('screen-dashboard').style.display = 'none';
-    document.getElementById('screen-auth').style.display = 'flex';
-    renderSessionArea();
-    toast('Vault deleted.');
-  });
-
-  /* ---------------- copy kid ---------------- */
-  document.getElementById('copy-kid').addEventListener('click', () => {
-    const kid = getSession();
-    navigator.clipboard?.writeText(kid).then(()=> toast('Vault ID copied.')).catch(()=> toast(kid));
-  });
-
-  /* ---------------- render all ---------------- */
-  function renderAll(){
-    renderBalance();
-    renderLedger();
-    renderChallenges();
-    loadSettings();
-    if (currentPage === 0) drawChart();
   }
 
-  /* ---------------- boot ---------------- */
-  const existingSession = getSession();
-  if (existingSession && getDirectory()[existingSession]){
-    enterDashboard();
-  } else {
-    clearSession();
-    renderSessionArea();
+  async function deleteAccount() {
+    if (!confirm('Delete this account permanently?')) return;
+    if (!currentUser) return;
+
+    await supabase.from('users').delete().eq('id', currentUser.id);
+    await handleLogout();
+    toast('Account deleted.');
   }
+
+  // Main Render
+  async function renderAll() {
+    if (currentPage === 0) await renderBalance();
+    if (currentPage === 1) await renderTransactions();
+    if (currentPage === 2) await renderChallenges();
+    if (currentPage === 3) loadSettings();
+  }
+
+  // Expose to global scope
+  window.switchAuthTab = switchAuthTab;
+  window.switchPage = switchPage;
+  window.handleLogin = handleLogin;
+  window.handleSignup = handleSignup;
+  window.handleLogout = handleLogout;
+  window.addTransaction = addTransaction;
+  window.createChallenge = createChallenge;
+  window.joinChallenge = joinChallenge;
+  window.contributeToChallenge = contributeToChallenge;
+  window.saveSettings = saveSettings;
+  window.deleteAccount = deleteAccount;
+
+  // Check if user is logged in on page load
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      await loadUserData();
+      enterDashboard();
+    }
+  });
 })();
 </script>
 </body>
