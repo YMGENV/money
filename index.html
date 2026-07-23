@@ -138,6 +138,7 @@
   }
   .balance-strip .label{ font-size:0.75rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--parchment-dim); margin-bottom:4px; }
   .balance-value{ font-size:2.4rem; font-family:'Fraunces',serif; color:var(--gold-bright); }
+  .balance-value.negative{ color:var(--rust); }
   .panel{
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     padding:22px; margin-bottom:20px;
@@ -820,7 +821,10 @@
     const kid = getSession();
     const acc = getDirectory()[kid];
     if (!acc) return;
-    document.getElementById('balance-display').textContent = fmt(acc.balance, acc.currency);
+    const isNegative = acc.balance < 0;
+    const display = document.getElementById('balance-display');
+    display.textContent = (isNegative ? '-' : '') + fmt(acc.balance, acc.currency);
+    display.classList.toggle('negative', isNegative);
     document.getElementById('my-kid-text').textContent = acc.kid;
   }
 
