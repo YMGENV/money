@@ -6,6 +6,7 @@
 <title>GoldTrack Finance — Your Vault, Your Terms</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --ink:#15120c;
@@ -269,7 +270,7 @@
       <div class="vault-hero">
         <div class="hero-copy">
           <h1>Your money, your vault, your ID.</h1>
-          <p>GoldTrack runs entirely in this browser. No server sees your balance. Every account gets a randomized Vault ID (#KID) instead of a name — use it to log in, receive messages, and join savings challenges without ever sharing your real balance.</p>
+          <p>GoldTrack syncs your vault to the cloud so you can open it from any device. Every account gets a randomized Vault ID (#KID) instead of a name — use it to log in and join savings challenges without ever sharing your real balance.</p>
         </div>
         <div class="dial-wrap">
           <div class="dial">
@@ -457,7 +458,7 @@
     </div>
   </div>
 
-  <footer class="note">All data lives in this browser's local storage only. Clearing your browser data clears GoldTrack too.</footer>
+  <footer class="note">Your Vault ID is the only key to your data — there's no password, so keep it somewhere safe.</footer>
 </div>
 
 <div class="modal-backdrop" id="modal-backdrop">
@@ -511,15 +512,68 @@
 (function(){
   "use strict";
 
-  /* ---------------- storage helpers ---------------- */
-  const DIR_KEY = 'goldtrack_directory';
-  const SESSION_KEY = 'goldtrack_session';
-  const CHAL_KEY = 'goldtrack_challenges';
+  /* ---------------- storage helpers (Supabase-backed) ---------------- */
+  const SESSION_KEY = 'goldtrack_session'; // session stays local — it's just "which vault is open on this device"
 
-  const getDirectory = () => JSON.parse(localStorage.getItem(DIR_KEY) || '{}');
-  const saveDirectory = (d) => localStorage.setItem(DIR_KEY, JSON.stringify(d));
-  const getChallenges = () => JSON.parse(localStorage.getItem(CHAL_KEY) || '{}');
-  const saveChallenges = (c) => localStorage.setItem(CHAL_KEY, JSON.stringify(c));
+  const SUPABASE_URL = 'https://dioayutqevandnicgkja.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpb2F5dXRxZXZhbmRuaWNna2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MjY2MTUsImV4cCI6MjEwMDMwMjYxNX0.emeR1SvKV7G08GOmwXHe3GasmD3nRutsdJR4xp9r31o';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // In-memory mirrors of the two Supabase tables, loaded at boot so the
+  // rest of the app (which reads these synchronously all over the place)
+  // doesn't need to be rewritten as async.
+  let directoryCache = {};
+  let challengesCache = {};
+
+  async function loadCaches(){
+    const [{ data: accRows, error: accErr }, { data: chalRows, error: chalErr }] = await Promise.all([
+      sb.from('accounts').select('kid,data'),
+      sb.from('challenges').select('code,data')
+    ]);
+    if (accErr) console.error('GoldTrack: failed to load accounts', accErr);
+    if (chalErr) console.error('GoldTrack: failed to load challenges', chalErr);
+    directoryCache = {};
+    (accRows || []).forEach(r => { directoryCache[r.kid] = r.data; });
+    challengesCache = {};
+    (chalRows || []).forEach(r => { challengesCache[r.code] = r.data; });
+  }
+
+  const getDirectory = () => directoryCache;
+  const getChallenges = () => challengesCache;
+
+  // Pass the kid/code that changed so only that row is written to Supabase.
+  // Callers that mutate dir[kid] or chals[code] in place already know which
+  // key changed, so this avoids re-uploading every account on every save.
+  function saveDirectory(d, kid){
+    directoryCache = d;
+    if (!kid) return;
+    const acc = d[kid];
+    if (acc){
+      sb.from('accounts').upsert({ kid, data: acc }).then(({ error }) => {
+        if (error){ console.error('GoldTrack: save failed', error); toast('Could not reach the server — try again.'); }
+      });
+    } else {
+      sb.from('accounts').delete().eq('kid', kid).then(({ error }) => {
+        if (error) console.error('GoldTrack: delete failed', error);
+      });
+    }
+  }
+
+  function saveChallenges(c, code){
+    challengesCache = c;
+    if (!code) return;
+    const chal = c[code];
+    if (chal){
+      sb.from('challenges').upsert({ code, data: chal }).then(({ error }) => {
+        if (error){ console.error('GoldTrack: save failed', error); toast('Could not reach the server — try again.'); }
+      });
+    } else {
+      sb.from('challenges').delete().eq('code', code).then(({ error }) => {
+        if (error) console.error('GoldTrack: delete failed', error);
+      });
+    }
+  }
+
   const getSession = () => localStorage.getItem(SESSION_KEY);
   const setSession = (kid) => localStorage.setItem(SESSION_KEY, kid);
   const clearSession = () => localStorage.removeItem(SESSION_KEY);
@@ -619,7 +673,7 @@
     const kid = genKID();
     const dir = getDirectory();
     dir[kid] = { kid, name, currency, balance:0, transactions:[], inbox:[], createdAt: Date.now() };
-    saveDirectory(dir);
+    saveDirectory(dir, kid);
     spinDialTo(kid);
     setTimeout(() => {
       setSession(kid);
@@ -796,7 +850,7 @@
     };
     acc.transactions.unshift(txn);
     acc.balance += currentTxnType === 'income' ? amount : -amount;
-    saveDirectory(dir);
+    saveDirectory(dir, kid);
 
     document.getElementById('txn-amount').value = '';
     document.getElementById('txn-desc').value = '';
@@ -951,7 +1005,7 @@
       participants: [{ kid, name: dir[kid].name, contributed: 0 }],
       createdAt: Date.now()
     };
-    saveChallenges(chals);
+    saveChallenges(chals, code);
     document.getElementById('chal-name').value = '';
     document.getElementById('chal-target').value = '';
     toast('Challenge created — code ' + code);
@@ -969,7 +1023,7 @@
     if (already){ errEl.textContent = 'You already joined this challenge.'; return; }
     errEl.textContent = '';
     chals[code].participants.push({ kid, name: dir[kid].name, contributed: 0 });
-    saveChallenges(chals);
+    saveChallenges(chals, code);
     document.getElementById('chal-code').value = '';
     toast('Joined ' + chals[code].name + '.');
     renderChallenges();
@@ -996,8 +1050,8 @@
     const participant = chal.participants.find(p => p.kid === kid);
     participant.contributed += amount;
 
-    saveDirectory(dir);
-    saveChallenges(chals);
+    saveDirectory(dir, kid);
+    saveChallenges(chals, code);
     toast('Contributed ' + fmt(amount, acc.currency) + ' to ' + chal.name + '.');
     renderAll();
   }
@@ -1056,7 +1110,7 @@
     if (!name){ toast('Display name cannot be empty.'); return; }
     dir[kid].name = name;
     dir[kid].currency = document.getElementById('settings-currency').value;
-    saveDirectory(dir);
+    saveDirectory(dir, kid);
     toast('Settings saved.');
     renderAll();
   });
@@ -1065,7 +1119,7 @@
     const kid = getSession();
     const dir = getDirectory();
     delete dir[kid];
-    saveDirectory(dir);
+    saveDirectory(dir, kid);
     clearSession();
     document.getElementById('screen-dashboard').style.display = 'none';
     document.getElementById('screen-auth').style.display = 'flex';
@@ -1089,13 +1143,16 @@
   }
 
   /* ---------------- boot ---------------- */
-  const existingSession = getSession();
-  if (existingSession && getDirectory()[existingSession]){
-    enterDashboard();
-  } else {
-    clearSession();
-    renderSessionArea();
-  }
+  (async function boot(){
+    await loadCaches();
+    const existingSession = getSession();
+    if (existingSession && getDirectory()[existingSession]){
+      enterDashboard();
+    } else {
+      clearSession();
+      renderSessionArea();
+    }
+  })();
 })();
 </script>
 </body>
