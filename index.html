@@ -142,6 +142,17 @@
   .balance-strip .label{ font-size:0.75rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--parchment-dim); margin-bottom:4px; }
   .balance-value{ font-size:2.4rem; font-family:'Fraunces',serif; color:var(--gold-bright); }
   .balance-value.negative{ color:var(--rust); }
+
+  .add-money-box{
+    background:transparent; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    display:flex; flex-direction:column; gap:6px; cursor:pointer; transition:background .15s;
+  }
+  .add-money-box:hover{ background:rgba(201,162,39,0.14); }
+  .add-money-box:active{ transform:scale(0.98); }
+  .add-money-box .amb-label{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--parchment-dim); }
+  .add-money-box .amb-action{ display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-size:1.1rem; color:var(--gold-bright); }
+  .add-money-box .amb-plus{ width:26px; height:26px; border-radius:50%; background:var(--gold); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:700; flex-shrink:0; }
+
   .panel{
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     padding:22px; margin-bottom:20px;
@@ -228,6 +239,26 @@
   .upi-tx-amt{ font-weight:700; text-align:right; }
   .upi-tx-amt.sent{ color:var(--rust); }
   .upi-tx-amt.received{ color:var(--sage); }
+
+  /* ---------- Transaction Modal ---------- */
+  .modal-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:999;
+    align-items:center; justify-content:center;
+  }
+  .modal-backdrop.open{ display:flex; }
+  .modal-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.8); position:relative;
+  }
+  .txn-modal-close, .modal-close{
+    position:absolute; top:12px; right:12px; background:none; border:none;
+    color:var(--parchment-dim); font-size:2rem; cursor:pointer; width:36px; height:36px;
+    display:flex; align-items:center; justify-content:center; transition:color .15s;
+  }
+  .txn-modal-close:hover, .modal-close:hover{ color:var(--parchment); }
+  .modal-card h2{ margin-top:0; margin-bottom:20px; font-size:1.2rem; }
+  .panel-head-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .txn-modal.modal-backdrop{ z-index:1001; }
 
   /* ---------- PIN Modal ---------- */
   .pin-modal{
@@ -384,10 +415,13 @@
     <div class="container">
       <div class="balance-strip">
         <div>
-          <div class="label">Balance</div>
+          <div class="label">Current balance</div>
           <div class="balance-value" id="balance-value">₹0</div>
         </div>
-        <button class="btn small secondary" id="btn-add-money">Add Money</button>
+        <button type="button" class="add-money-box" id="add-money-box">
+          <div class="amb-label">Top up</div>
+          <div class="amb-action"><span class="amb-plus">+</span> Add Money</div>
+        </button>
       </div>
 
       <div class="tab-nav">
@@ -409,9 +443,12 @@
       <!-- Ledger Tab -->
       <div class="tab-pane">
         <div class="panel">
-          <h2>Transaction History</h2>
+          <div class="panel-head-row">
+            <h2>Transaction history</h2>
+            <button class="btn small secondary" id="btn-add-transaction">+ Add Transaction</button>
+          </div>
           <ul class="ledger-list" id="ledger-list"></ul>
-          <div class="empty-note" id="ledger-empty" style="display:none;">No transactions yet.</div>
+          <div class="empty-note" id="ledger-empty" style="display:none;">No transactions yet. Everything you record stays on this device.</div>
         </div>
       </div>
 
@@ -556,6 +593,47 @@
   </div>
 
 
+</div>
+
+<!-- Transaction Modal -->
+<div class="modal-backdrop txn-modal" id="txn-modal-backdrop">
+  <div class="modal-card">
+    <button class="txn-modal-close" id="txn-modal-close">&times;</button>
+    <h2 id="txn-modal-title">Add Transaction</h2>
+    <div class="field">
+      <label for="txn-amount">Amount</label>
+      <input id="txn-amount" type="number" min="0.01" step="0.01" placeholder="0.00">
+    </div>
+    <div class="field" id="txn-category-wrap" style="display:none;">
+      <label for="txn-category">Category</label>
+      <input id="txn-category" list="category-list" maxlength="30" placeholder="e.g. Food, Transport">
+      <datalist id="category-list">
+        <option value="Food"></option>
+        <option value="Transport"></option>
+        <option value="Housing"></option>
+        <option value="Utilities"></option>
+        <option value="Entertainment"></option>
+        <option value="Games"></option>
+        <option value="Health"></option>
+        <option value="Shopping"></option>
+        <option value="Other"></option>
+      </datalist>
+    </div>
+    <div class="field">
+      <label for="txn-desc">Note (optional)</label>
+      <input id="txn-desc" type="text" maxlength="60" placeholder="What was this for?">
+    </div>
+    <div class="field">
+      <label>Receipt or photo proof — required</label>
+      <div class="upload-box" id="upload-box">
+        <span id="upload-label">Tap to attach an image</span>
+        <input type="file" id="txn-file" accept="image/*">
+        <img id="upload-preview" class="upload-preview">
+      </div>
+    </div>
+    <div class="error-msg" id="txn-error"></div>
+    <button class="btn" id="btn-add-txn">Save to ledger</button>
+  </div>
 </div>
 
 <!-- PIN Modal -->
@@ -742,34 +820,94 @@
     });
   });
 
-  /* ---------- Add Money ---------- */
-  document.getElementById('btn-add-money').addEventListener('click', () => {
+  /* ---------- Transaction Modal System ---------- */
+  let currentTxnType = 'expense';
+  let currentFileData = null;
+  const txnModalBackdrop = document.getElementById('txn-modal-backdrop');
+  const uploadBox = document.getElementById('upload-box');
+  const uploadInput = document.getElementById('txn-file');
+  const uploadLabel = document.getElementById('upload-label');
+  const uploadPreview = document.getElementById('upload-preview');
+
+  uploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      currentFileData = evt.target.result;
+      uploadPreview.src = currentFileData;
+      uploadPreview.style.display = 'block';
+      uploadBox.classList.add('has-file');
+      uploadLabel.textContent = 'Image attached ✓';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function openTxnModal(type){
+    currentTxnType = type;
+    document.getElementById('txn-modal-title').textContent = type === 'income' ? 'Add Money' : 'Add Transaction';
+    document.getElementById('txn-category-wrap').style.display = type === 'expense' ? 'block' : 'none';
+    document.getElementById('txn-amount').value = '';
+    document.getElementById('txn-desc').value = '';
+    document.getElementById('txn-category').value = '';
+    document.getElementById('txn-error').textContent = '';
+    currentFileData = null;
+    uploadPreview.style.display = 'none';
+    uploadLabel.textContent = 'Tap to attach an image';
+    uploadBox.classList.remove('has-file');
+    uploadInput.value = '';
+    txnModalBackdrop.classList.add('open');
+  }
+
+  function closeTxnModal(){
+    txnModalBackdrop.classList.remove('open');
+  }
+
+  document.getElementById('add-money-box').addEventListener('click', () => openTxnModal('income'));
+  document.getElementById('btn-add-transaction').addEventListener('click', () => openTxnModal('expense'));
+  document.getElementById('txn-modal-close').addEventListener('click', closeTxnModal);
+  txnModalBackdrop.addEventListener('click', (e) => { if (e.target.id === 'txn-modal-backdrop') closeTxnModal(); });
+
+  document.getElementById('btn-add-txn').addEventListener('click', () => {
+    const errEl = document.getElementById('txn-error');
+    const amount = parseFloat(document.getElementById('txn-amount').value);
+    const desc = document.getElementById('txn-desc').value.trim();
+    const category = currentTxnType === 'expense' ? (document.getElementById('txn-category').value.trim() || 'Other') : null;
+
+    if (!amount || amount <= 0){ errEl.textContent = 'Enter an amount greater than zero.'; return; }
+    if (!currentFileData){
+      errEl.textContent = 'Attach a receipt or photo before saving this transaction.';
+      uploadBox.classList.remove('shake'); void uploadBox.offsetWidth; uploadBox.classList.add('shake');
+      return;
+    }
+
+    errEl.textContent = '';
+
     const kid = getSession();
     const dir = getDirectory();
     const acc = dir[kid];
-    const raw = prompt('How much gold to add? (Max ₹1,00,000)');
-    if (raw === null) return;
-    const amount = parseFloat(raw);
-    if (!amount || amount <= 0){ toast('Enter an amount greater than zero.'); return; }
-    if (amount > 100000){ toast('Maximum allowed: ₹1,00,000'); return; }
-    
-    // Request PIN for Add Money
-    showPINModal('Add Money', () => {
-      acc.balance += amount;
-      acc.transactions.unshift({
-        id: 'T' + Date.now(),
-        type: 'income',
-        amount,
-        category: 'Top-up',
-        desc: 'Added to vault',
-        proof: null,
-        date: new Date().toISOString(),
-        internal: true
-      });
-      saveDirectory(dir);
-      toast('Added ' + fmt(amount, acc.currency) + ' to your vault.');
-      renderAll();
-    });
+    const txn = {
+      id: 'T' + Date.now() + Math.floor(Math.random()*1000),
+      type: currentTxnType,
+      amount, category, desc,
+      proof: currentFileData,
+      date: new Date().toISOString()
+    };
+    acc.transactions.unshift(txn);
+    acc.balance += currentTxnType === 'income' ? amount : -amount;
+    saveDirectory(dir);
+
+    document.getElementById('txn-amount').value = '';
+    document.getElementById('txn-desc').value = '';
+    currentFileData = null;
+    uploadPreview.style.display = 'none';
+    uploadLabel.textContent = 'Tap to attach an image';
+    uploadBox.classList.remove('has-file');
+    uploadInput.value = '';
+
+    closeTxnModal();
+    toast('Saved to your ledger.');
+    renderAll();
   });
 
   /* ---------- Balance & Ledger ---------- */
