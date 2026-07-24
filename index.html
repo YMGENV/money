@@ -130,8 +130,7 @@
   .hint{ color:var(--parchment-dim); font-size:0.8rem; margin-top:10px; }
 
   /* ---------- Dashboard ---------- */
-  #screen-dashboard{ display:none; grid-template-columns:1fr 320px; gap:24px; }
-  @media (max-width:1200px){ #screen-dashboard{ grid-template-columns:1fr; } }
+  #screen-dashboard{ display:none; }
 
   .main-content{ display:flex; flex-direction:column; }
   .balance-strip{
@@ -197,72 +196,38 @@
   .tab-pane{ display:none; }
   .tab-pane.active{ display:block; }
 
-  /* ---------- UPI Right Sidebar ---------- */
-  .upi-sidebar{
-    position:sticky; top:20px; height:fit-content;
-  }
-  .upi-panel{
+  /* ---------- UPI Page Styles ---------- */
+  .upi-container{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width:900px){ .upi-container{ grid-template-columns:1fr; } }
+
+  .upi-card{
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
-    padding:18px; box-shadow:var(--shadow);
+    padding:22px;
   }
-  .upi-panel h3{ font-size:1rem; margin:0 0 14px; display:flex; align-items:center; gap:8px; }
-  .upi-icon{ width:24px; height:24px; background:conic-gradient(from 45deg, var(--gold-bright), var(--sage)); border-radius:4px; }
-
-  .upi-tabs{ display:flex; gap:6px; margin-bottom:12px; background:var(--panel-alt); border-radius:6px; padding:4px; }
-  .upi-tabs button{
-    flex:1; padding:6px 8px; border:none; background:none; color:var(--parchment-dim);
-    border-radius:4px; font-size:0.75rem; font-weight:600; cursor:pointer;
-    transition:all .15s;
-  }
-  .upi-tabs button.active{ background:var(--gold); color:var(--ink); }
-
-  .upi-section{ display:none; }
-  .upi-section.active{ display:block; }
+  .upi-card h2{ font-size:1.15rem; margin:0 0 16px; }
 
   .upi-qr-display{
-    background:var(--ink); border:1px solid var(--line); border-radius:8px; padding:12px;
+    background:var(--ink); border:1px solid var(--line); border-radius:8px; padding:16px;
     display:flex; justify-content:center; margin-bottom:12px;
   }
   .upi-qr-display canvas{ max-width:100%; height:auto; }
 
-  .upi-amount-input{
-    display:flex; gap:6px; margin-bottom:10px;
-  }
-  .upi-amount-input input{
-    flex:1; background:var(--ink); border:1px solid var(--line); color:var(--parchment);
-    border-radius:6px; padding:8px; font-size:0.85rem;
-  }
-  .upi-amount-input input:focus{ border-color:var(--gold); }
-
-  .upi-btn{
-    width:100%; padding:10px; background:var(--gold); color:var(--ink); border:none;
-    border-radius:6px; font-weight:600; font-size:0.85rem; cursor:pointer;
-    transition:background .15s;
-  }
-  .upi-btn:hover{ background:var(--gold-bright); }
-  .upi-btn.secondary{ background:var(--panel-alt); color:var(--parchment); border:1px solid var(--line); }
-  .upi-btn.secondary:hover{ background:var(--ink); }
-  .upi-btn:disabled{ opacity:0.5; cursor:not-allowed; }
-
-  .upi-divider{ height:1px; background:var(--line); margin:10px 0; }
+  .upi-divider{ height:1px; background:var(--line); margin:16px 0; }
 
   .upi-history{
-    max-height:200px; overflow-y:auto; font-size:0.8rem;
+    max-height:300px; overflow-y:auto; font-size:0.8rem;
   }
   .upi-tx{
-    padding:8px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start;
   }
   .upi-tx:last-child{ border-bottom:none; }
-  .upi-tx-label{ color:var(--parchment-dim); font-size:0.75rem; }
-  .upi-tx-amt{ font-weight:600; }
+  .upi-tx-left{ flex:1; }
+  .upi-tx-label{ color:var(--parchment-dim); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+  .upi-tx-name{ color:var(--parchment); font-weight:500; font-size:0.9rem; }
+  .upi-tx-date{ color:var(--parchment-dim); font-size:0.75rem; margin-top:2px; }
+  .upi-tx-amt{ font-weight:700; text-align:right; }
   .upi-tx-amt.sent{ color:var(--rust); }
   .upi-tx-amt.received{ color:var(--sage); }
-
-  .upi-feature-list{
-    font-size:0.78rem; line-height:1.6; color:var(--parchment-dim);
-  }
-  .upi-feature-list li{ margin-bottom:8px; padding-left:14px; position:relative; }
-  .upi-feature-list li:before{ content:'✓'; position:absolute; left:0; color:var(--sage); font-weight:700; }
 
   /* ---------- PIN Modal ---------- */
   .pin-modal{
@@ -429,6 +394,7 @@
         <button class="tab-btn active" data-page="0">Dashboard</button>
         <button class="tab-btn" data-page="1">Ledger</button>
         <button class="tab-btn" data-page="2">Challenges</button>
+        <button class="tab-btn" data-page="4">UPI Payments</button>
         <button class="tab-btn" data-page="3">Settings</button>
       </div>
 
@@ -481,6 +447,81 @@
         <div class="empty-note" id="chal-empty" style="display:none;">Join or create a challenge to get started.</div>
       </div>
 
+      <!-- UPI Payments Tab -->
+      <div class="tab-pane">
+        <div class="upi-container">
+          <!-- Send Section -->
+          <div class="upi-card">
+            <h2>Send Money</h2>
+            <div class="field">
+              <label>Receiver's Vault ID</label>
+              <input type="text" id="receiver-id" placeholder="Paste vault ID">
+            </div>
+            <div class="field">
+              <label>Amount (Max ₹1,00,000)</label>
+              <input type="number" id="send-amount" placeholder="0" min="0" max="100000" step="1">
+            </div>
+            <button class="btn" id="btn-generate-qr">Generate Payment QR</button>
+            <div id="send-qr-container" style="display:none; margin-top:16px;">
+              <div class="upi-qr-display">
+                <canvas id="send-qr-canvas" style="width:180px; height:180px;"></canvas>
+              </div>
+              <div style="font-size:0.78rem; color:var(--parchment-dim); text-align:center; margin-bottom:10px;">
+                Share this QR with receiver to confirm payment
+              </div>
+              <button class="btn secondary" id="btn-copy-qr-data">Copy as Text</button>
+            </div>
+          </div>
+
+          <!-- Receive Section -->
+          <div class="upi-card">
+            <h2>Receive Money</h2>
+            <div class="field">
+              <label>Request Amount (Optional)</label>
+              <input type="number" id="request-amount" placeholder="Leave blank for any amount" min="0" max="100000" step="1">
+            </div>
+            <button class="btn" id="btn-my-qr">Show My QR Code</button>
+            <div id="my-qr-container" style="display:none; margin-top:16px;">
+              <div class="upi-qr-display">
+                <canvas id="my-qr-canvas" style="width:180px; height:180px;"></canvas>
+              </div>
+              <div style="font-size:0.78rem; color:var(--parchment-dim); text-align:center; margin-bottom:10px;">
+                Share your Vault ID and requested amount
+              </div>
+              <button class="btn secondary" id="btn-copy-my-qr">Copy as Text</button>
+            </div>
+
+            <div class="upi-divider"></div>
+
+            <div style="margin-top:16px;">
+              <label style="display:block; font-size:0.78rem; color:var(--parchment-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Confirm Receipt</label>
+              <p style="font-size:0.8rem; color:var(--parchment-dim); margin-bottom:8px;">Paste the payment confirmation QR code from sender:</p>
+              <input type="text" id="scan-confirmation" placeholder="Paste confirmation QR data">
+              <button class="btn secondary" id="btn-confirm-scan" style="margin-top:8px;">Confirm Receipt</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+          <h2>Transaction History</h2>
+          <div class="upi-history" id="upi-history-list">
+            <div class="empty-note">No UPI transactions yet.</div>
+          </div>
+          <button class="btn danger small" id="btn-clear-upi-history" style="margin-top:12px;">Clear History</button>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+          <h2>UPI Features</h2>
+          <ul style="list-style:none; padding:0; margin:0; font-size:0.85rem; line-height:1.8; color:var(--parchment-dim);">
+            <li>✓ <strong style="color:var(--parchment);">4-Digit PIN Protection</strong> — Verify all transfers with your secure PIN</li>
+            <li>✓ <strong style="color:var(--parchment);">Two-Way QR Syncing</strong> — Send & receive via encrypted QR codes</li>
+            <li>✓ <strong style="color:var(--parchment);">Transaction Limits</strong> — Max ₹1,00,000 per transfer</li>
+            <li>✓ <strong style="color:var(--parchment);">Persistent History</strong> — All transactions saved locally</li>
+            <li>✓ <strong style="color:var(--parchment);">Instant Sync</strong> — Balance updates immediately on both devices</li>
+          </ul>
+        </div>
+      </div>
+
       <!-- Settings Tab -->
       <div class="tab-pane">
         <div class="panel">
@@ -514,82 +555,7 @@
     </div>
   </div>
 
-  <!-- UPI Payments Right Sidebar -->
-  <div class="upi-sidebar">
-    <div class="upi-panel">
-      <h3><div class="upi-icon"></div> UPI Payments</h3>
-      
-      <div class="upi-tabs">
-        <button class="active" data-upi-tab="send">Send</button>
-        <button data-upi-tab="receive">Receive</button>
-        <button data-upi-tab="history">History</button>
-      </div>
 
-      <!-- Send Tab -->
-      <div class="upi-section active" data-upi-section="send">
-        <div class="field" style="margin-bottom:12px;">
-          <label>Receiver's Vault ID</label>
-          <input type="text" id="receiver-id" placeholder="Paste vault ID" style="background:var(--ink); border:1px solid var(--line); color:var(--parchment); border-radius:6px; padding:8px; font-size:0.85rem; width:100%;">
-        </div>
-        <div class="field" style="margin-bottom:12px;">
-          <label>Amount (Max ₹1,00,000)</label>
-          <input type="number" id="send-amount" placeholder="0" min="0" max="100000" step="1" style="background:var(--ink); border:1px solid var(--line); color:var(--parchment); border-radius:6px; padding:8px; font-size:0.85rem; width:100%;">
-        </div>
-        <button class="upi-btn" id="btn-generate-qr">Generate QR Code</button>
-        <div id="send-qr-container" style="display:none; margin-top:12px;">
-          <div class="upi-qr-display">
-            <canvas id="send-qr-canvas" style="width:160px; height:160px;"></canvas>
-          </div>
-          <div style="font-size:0.78rem; color:var(--parchment-dim); text-align:center; margin-bottom:10px;">
-            Share this QR with receiver →
-          </div>
-          <button class="upi-btn secondary" id="btn-copy-qr-data">Copy as Text</button>
-        </div>
-      </div>
-
-      <!-- Receive Tab -->
-      <div class="upi-section" data-upi-section="receive">
-        <div class="field" style="margin-bottom:12px;">
-          <label>Request Amount (Optional)</label>
-          <input type="number" id="request-amount" placeholder="Leave blank for any" min="0" max="100000" step="1" style="background:var(--ink); border:1px solid var(--line); color:var(--parchment); border-radius:6px; padding:8px; font-size:0.85rem; width:100%;">
-        </div>
-        <button class="upi-btn" id="btn-my-qr">Show My QR Code</button>
-        <div id="my-qr-container" style="display:none; margin-top:12px;">
-          <div class="upi-qr-display">
-            <canvas id="my-qr-canvas" style="width:160px; height:160px;"></canvas>
-          </div>
-          <div style="font-size:0.78rem; color:var(--parchment-dim); text-align:center; margin-bottom:10px;">
-            Your Vault ID & Request →
-          </div>
-          <button class="upi-btn secondary" id="btn-copy-my-qr">Copy as Text</button>
-        </div>
-        <div class="upi-divider"></div>
-        <div style="margin-top:12px;">
-          <label style="display:block; font-size:0.75rem; color:var(--parchment-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Scan Confirmation QR</label>
-          <input type="text" id="scan-confirmation" placeholder="Paste confirmation QR data here" style="background:var(--ink); border:1px solid var(--line); color:var(--parchment); border-radius:6px; padding:8px; font-size:0.85rem; width:100%;">
-          <button class="upi-btn" id="btn-confirm-scan" style="margin-top:8px;">Confirm Receipt</button>
-        </div>
-      </div>
-
-      <!-- History Tab -->
-      <div class="upi-section" data-upi-section="history">
-        <div class="upi-history" id="upi-history-list">
-          <div class="empty-note">No transactions yet.</div>
-        </div>
-        <button class="upi-btn secondary" id="btn-clear-upi-history" style="margin-top:12px; width:100%;">Clear History</button>
-      </div>
-
-      <div class="upi-divider" style="margin-top:14px;"></div>
-      <div class="upi-feature-list">
-        <ul style="list-style:none; padding:0; margin:0;">
-          <li>🔐 4-Digit PIN Protection</li>
-          <li>🔄 Two-Way QR Syncing</li>
-          <li>💾 Persistent History</li>
-          <li>📊 Transaction Limits</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- PIN Modal -->
@@ -759,14 +725,20 @@
 
   /* ---------- Page Navigation ---------- */
   let currentPage = 0;
-  document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
+      const pageNum = parseInt(btn.dataset.page);
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      document.querySelectorAll('.tab-pane')[idx].classList.add('active');
-      currentPage = idx;
-      if (idx === 0) setTimeout(drawChart, 0);
+      
+      // Map page numbers to pane indices
+      const paneMap = { 0: 0, 1: 1, 2: 2, 4: 3, 3: 4 };
+      const paneIdx = paneMap[pageNum];
+      document.querySelectorAll('.tab-pane')[paneIdx].classList.add('active');
+      currentPage = pageNum;
+      if (pageNum === 0) setTimeout(drawChart, 0);
+      if (pageNum === 4) renderUPIHistory();
     });
   });
 
@@ -1043,15 +1015,7 @@
     if (currentPage === 0) drawChart();
   }
 
-  /* ---------- UPI TAB NAVIGATION ---------- */
-  document.querySelectorAll('.upi-tabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.upi-tabs button').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.upi-section').forEach(s => s.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelector('[data-upi-section="' + btn.dataset.upiTab + '"]').classList.add('active');
-    });
-  });
+
 
   /* ---------- PIN MODAL ---------- */
   let pinBuffer = '';
@@ -1176,8 +1140,35 @@
     if (!amount || amount <= 0){ toast('Enter an amount greater than zero.'); return; }
     if (amount > 100000){ toast('Maximum allowed: ₹1,00,000'); return; }
     
+    const acc = dir[kid];
+    if (amount > acc.balance){ toast('Insufficient balance. You have ' + fmt(acc.balance, acc.currency)); return; }
+    
     showPINModal('Confirm Payment', () => {
-      const acc = dir[kid];
+      // Deduct from sender immediately
+      acc.balance -= amount;
+      acc.transactions.unshift({
+        id: 'T' + Date.now(),
+        type: 'expense',
+        amount: amount,
+        category: 'UPI Transfer',
+        desc: 'Sent to ' + dir[receiverId].name,
+        date: new Date().toISOString(),
+        internal: true
+      });
+      
+      // Log UPI transaction
+      const upiTxs = getUPITransactions(kid);
+      upiTxs.unshift({
+        id: 'UPI-' + Date.now(),
+        type: 'sent',
+        amount: amount,
+        receiver: dir[receiverId].name,
+        receiverId: receiverId,
+        timestamp: Date.now()
+      });
+      saveUPITransactions(kid, upiTxs);
+      saveDirectory(dir);
+      
       const payload = {
         type: 'payment_request',
         senderId: kid,
@@ -1189,6 +1180,7 @@
       
       const encrypted = encryptPayload(payload);
       displayPaymentQR(encrypted, { amount, receiver: dir[receiverId].name });
+      renderBalance();
     });
   });
 
@@ -1331,8 +1323,6 @@
   /* ---------- UPI: HISTORY ---------- */
   function renderUPIHistory(){
     const kid = getSession();
-    const dir = getDirectory();
-    const acc = dir[kid];
     const txs = getUPITransactions(kid);
     const container = document.getElementById('upi-history-list');
     
@@ -1342,20 +1332,18 @@
     }
     
     container.innerHTML = '';
-    txs.slice(0, 8).forEach(tx => {
-      const date = new Date(tx.confirmedAt || tx.timestamp);
+    txs.forEach(tx => {
+      const date = new Date(tx.timestamp);
       const li = document.createElement('div');
       li.className = 'upi-tx';
       li.innerHTML = `
-        <div>
-          <div class="upi-tx-label">${tx.type === 'sent' ? '↑ Sent to' : '↓ Received from'}</div>
-          <div>${escapeHtml(tx.type === 'sent' ? tx.receiver : tx.sender)}</div>
+        <div class="upi-tx-left">
+          <div class="upi-tx-label">${tx.type === 'sent' ? '↑ Sent' : '↓ Received'}</div>
+          <div class="upi-tx-name">${escapeHtml(tx.type === 'sent' ? tx.receiver : tx.sender)}</div>
+          <div class="upi-tx-date">${date.toLocaleDateString()} at ${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
         </div>
-        <div>
-          <div class="upi-tx-amt ${tx.type === 'sent' ? 'sent' : 'received'}">
-            ${tx.type === 'sent' ? '-' : '+'}₹${tx.amount.toLocaleString('en-IN')}
-          </div>
-          <div style="font-size:0.7rem; color:var(--parchment-dim);">${date.toLocaleDateString()}</div>
+        <div class="upi-tx-amt ${tx.type === 'sent' ? 'sent' : 'received'}">
+          ${tx.type === 'sent' ? '−' : '+'}₹${tx.amount.toLocaleString('en-IN')}
         </div>
       `;
       container.appendChild(li);
