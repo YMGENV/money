@@ -440,6 +440,16 @@
               <button class="btn secondary" id="btn-save-settings">Save changes</button>
             </div>
             <div class="panel">
+              <h2>Backup &amp; transfer</h2>
+              <p class="hint" style="margin-top:0;">Export saves your Vault ID, balance, ledger and receipt photos to a file. Importing a file on another device replaces that device's current vault and ID with the one in the file.</p>
+              <div class="grid-2">
+                <button class="btn secondary" id="btn-export-data" type="button">Export data</button>
+                <button class="btn secondary" id="btn-import-data" type="button">Import data</button>
+              </div>
+              <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
+              <div class="error-msg" id="import-error" style="margin-top:12px;"></div>
+            </div>
+            <div class="panel">
               <h2>Danger zone</h2>
               <p class="hint" style="margin-top:0;">Deleting your vault removes your balance, ledger, and messages from this device permanently.</p>
               <button class="btn danger" id="btn-delete-vault">Delete this vault</button>
@@ -645,7 +655,7 @@
     if (!kid){ area.innerHTML = ''; return; }
     const dir = getDirectory();
     const acc = dir[kid];
-    area.innerHTML = `<div class="session-pill"><span class="dot"></span><span class="mono" style="font-size:0.82rem;">${acc ? acc.name : kid}</span><button id="btn-logout">log out</button></div>`;
+    area.innerHTML = `<div class="session-pill"><span class="dot"></span><span class="mono" style="font-size:0.82rem;">${escapeHtml(acc ? acc.name : kid)}</span><button id="btn-logout">log out</button></div>`;
     document.getElementById('btn-logout').addEventListener('click', () => {
       clearSession();
       document.getElementById('screen-dashboard').style.display = 'none';
@@ -843,8 +853,8 @@
       li.innerHTML = `
         ${thumb}
         <div class="ledger-info">
-          <div class="desc">${t.desc || (t.category || (t.type === 'income' ? 'Income' : 'Expense'))}</div>
-          <div class="cat">${t.category ? t.category + ' · ' : ''}${t.proof ? '<span class="stamp">Proof attached</span>' : ''}</div>
+          <div class="desc">${escapeHtml(t.desc || (t.category || (t.type === 'income' ? 'Income' : 'Expense')))}</div>
+          <div class="cat">${t.category ? escapeHtml(t.category) + ' · ' : ''}${t.proof ? '<span class="stamp">Proof attached</span>' : ''}</div>
         </div>
         <div style="text-align:right;">
           <div class="ledger-amt ${t.type}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount, acc.currency)}</div>
@@ -1071,6 +1081,145 @@
     document.getElementById('screen-auth').style.display = 'flex';
     renderSessionArea();
     toast('Vault deleted.');
+  });
+
+  /* ---------------- export / import ---------------- */
+  const EXPORT_FORMAT = 'goldtrack-vault';
+  const EXPORT_VERSION = 1;
+  const KID_RE = /^GT-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+
+  document.getElementById('btn-export-data').addEventListener('click', () => {
+    const kid = getSession();
+    const acc = getDirectory()[kid];
+    if (!acc){ toast('Nothing to export.'); return; }
+    const payload = {
+      format: EXPORT_FORMAT,
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      account: {
+        kid: acc.kid,
+        name: acc.name,
+        currency: acc.currency,
+        balance: acc.balance,
+        createdAt: acc.createdAt || Date.now(),
+        transactions: acc.transactions
+      }
+    };
+    const blob = new Blob([JSON.stringify(payload)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `goldtrack-${acc.kid}-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Data exported.');
+  });
+
+  function parseImport(text){
+    let data;
+    try { data = JSON.parse(text); } catch(e){ throw new Error('That file is not valid JSON.'); }
+    if (!data || data.format !== EXPORT_FORMAT) throw new Error('This is not a GoldTrack export file.');
+    if (data.version !== EXPORT_VERSION) throw new Error('Unsupported export version.');
+    const a = data.account;
+    if (!a || typeof a !== 'object') throw new Error('The file has no account data.');
+
+    const kid = String(a.kid || '').trim().toUpperCase();
+    if (!KID_RE.test(kid)) throw new Error('The Vault ID in the file is invalid.');
+    const name = String(a.name || '').trim().slice(0, 40);
+    if (!name) throw new Error('The display name in the file is empty.');
+    if (!Object.prototype.hasOwnProperty.call(CURRENCY_SYMBOL, a.currency)) throw new Error('The currency in the file is not supported.');
+    if (!Array.isArray(a.transactions)) throw new Error('The ledger in the file is invalid.');
+
+    const transactions = a.transactions.map((t, i) => {
+      if (!t || (t.type !== 'income' && t.type !== 'expense')) throw new Error('Transaction ' + (i+1) + ' has an invalid type.');
+      const amount = Number(t.amount);
+      if (!isFinite(amount) || amount <= 0) throw new Error('Transaction ' + (i+1) + ' has an invalid amount.');
+      const date = new Date(t.date);
+      if (isNaN(date.getTime())) throw new Error('Transaction ' + (i+1) + ' has an invalid date.');
+      let proof = null;
+      if (t.proof){
+        if (typeof t.proof !== 'string' || !/^data:image\/(jpeg|png|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(t.proof)){
+          throw new Error('Transaction ' + (i+1) + ' has an invalid receipt image.');
+        }
+        proof = t.proof;
+      }
+      const txn = {
+        id: String(t.id || ('T' + Date.now() + i)).slice(0, 40),
+        type: t.type,
+        amount,
+        category: t.category ? String(t.category).slice(0, 30) : null,
+        desc: t.desc ? String(t.desc).slice(0, 60) : '',
+        proof,
+        date: date.toISOString()
+      };
+      if (t.internal) txn.internal = true;
+      return txn;
+    });
+
+    // Balance is always the sum of the ledger, so recompute rather than trust the file.
+    const balance = transactions.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
+    const createdAt = Number(a.createdAt) || Date.now();
+    return { kid, name, currency: a.currency, balance, transactions, inbox: [], createdAt };
+  }
+
+  function applyImport(imported){
+    const oldKid = getSession();
+    const dir = getDirectory();
+    if (oldKid && oldKid !== imported.kid) delete dir[oldKid];
+    dir[imported.kid] = imported;
+    saveDirectory(dir);
+
+    // Keep challenge membership attached to the account under its new ID.
+    if (oldKid && oldKid !== imported.kid){
+      const chals = getChallenges();
+      Object.values(chals).forEach(c => {
+        c.participants.forEach(p => { if (p.kid === oldKid){ p.kid = imported.kid; p.name = imported.name; } });
+        if (c.createdBy === oldKid) c.createdBy = imported.kid;
+      });
+      saveChallenges(chals);
+    }
+    setSession(imported.kid);
+    renderSessionArea();
+    renderAll();
+  }
+
+  const importInput = document.getElementById('import-file');
+  document.getElementById('btn-import-data').addEventListener('click', () => {
+    document.getElementById('import-error').textContent = '';
+    importInput.value = '';
+    importInput.click();
+  });
+  importInput.addEventListener('change', () => {
+    const file = importInput.files[0];
+    const errEl = document.getElementById('import-error');
+    if (!file) return;
+    errEl.textContent = '';
+    const reader = new FileReader();
+    reader.onerror = () => { errEl.textContent = 'Could not read that file.'; };
+    reader.onload = () => {
+      let imported;
+      try { imported = parseImport(String(reader.result)); }
+      catch(e){ errEl.textContent = e.message; return; }
+
+      const currentKid = getSession();
+      const dir = getDirectory();
+      let msg = 'Import "' + imported.name + '" (' + imported.kid + ', ' + imported.transactions.length + ' transactions)?\n\n' +
+                'This replaces your current vault and its ID on this device.';
+      if (imported.kid !== currentKid && dir[imported.kid]){
+        msg += '\n\nA different vault with ID ' + imported.kid + ' already exists on this device and will be overwritten too.';
+      }
+      if (!confirm(msg)) return;
+      try {
+        applyImport(imported);
+      } catch(e){
+        errEl.textContent = 'Import failed: browser storage is full or unavailable.';
+        return;
+      }
+      toast('Imported. Your Vault ID is now ' + imported.kid);
+    };
+    reader.readAsText(file);
   });
 
   /* ---------------- copy kid ---------------- */
